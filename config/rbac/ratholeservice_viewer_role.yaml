@@ -1,0 +1,27 @@
+# permissions for end users to view ratholeservices.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeservice-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: rathole-operator
+    app.kubernetes.io/part-of: rathole-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: ratholeservice-viewer-role
+rules:
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservices/status
+  verbs:
+  - get

@@ -1,0 +1,26 @@
+apiVersion: rathole.superclass.io/v1alpha1
+kind: RatholeServer
+metadata:
+  labels:
+    app.kubernetes.io/name: ratholeserver
+    app.kubernetes.io/instance: ratholeserver-sample
+    app.kubernetes.io/part-of: rathole-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: rathole-operator
+  name: edge-ssh-3379a116b93d9d5ddfbd5ff7e9f0663a
+  namespace: edge
+spec:
+  configTarget:
+    resourceType: configmap
+    name: edge-ssh-rathole-server-3379a116b93d9d5ddfbd5ff7e9f0663a
+  bindAddr: 0.0.0.0:8000
+#  defaultToken: default-token
+  defaultTokenFrom:
+    secretRef:
+      name: server-3379a116b93d9d5ddfbd5ff7e9f0663a
+      key: defaultToken
+  transport:
+    type: tcp
+    tcp:
+      nodelay: true
+      keepaliveSecs: 20

@@ -1,0 +1,6 @@
+## Append samples of your project ##
+resources:
+- rathole_v1alpha1_ratholeserver.yaml
+- rathole_v1alpha1_ratholeclient.yaml
+- rathole_v1alpha1_ratholeservice.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

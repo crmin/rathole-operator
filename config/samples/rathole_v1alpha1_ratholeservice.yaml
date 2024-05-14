@@ -1,0 +1,19 @@
+apiVersion: rathole.superclass.io/v1alpha1
+kind: RatholeService
+metadata:
+  labels:
+    app.kubernetes.io/name: ratholeservice
+    app.kubernetes.io/instance: ratholeservice-sample
+    app.kubernetes.io/part-of: rathole-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: rathole-operator
+#  name: ratholeservice-sample
+  name: ssh-service
+  namespace: edge
+spec:
+  serverRef:
+    name: edge-ssh-3379a116b93d9d5ddfbd5ff7e9f0663a
+  type: tcp
+  token: service-token
+  localAddr: 127.0.0.1:22
+  bindAddr: 0.0.0.0:2222

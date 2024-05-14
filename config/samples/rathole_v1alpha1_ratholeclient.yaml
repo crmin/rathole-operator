@@ -1,0 +1,12 @@
+apiVersion: rathole.superclass.io/v1alpha1
+kind: RatholeClient
+metadata:
+  labels:
+    app.kubernetes.io/name: ratholeclient
+    app.kubernetes.io/instance: ratholeclient-sample
+    app.kubernetes.io/part-of: rathole-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: rathole-operator
+  name: ratholeclient-sample
+spec:
+  # TODO(user): Add fields here

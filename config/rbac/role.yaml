@@ -1,0 +1,104 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- resources:
+  - configmap
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- resources:
+  - secret
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeclients
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeclients/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeclients/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - rathole.superclass.io
+  resources:
+  - ratholeservices/status
+  verbs:
+  - get
+  - patch
+  - update
