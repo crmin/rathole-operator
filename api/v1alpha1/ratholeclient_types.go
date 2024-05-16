@@ -34,13 +34,16 @@ type RatholeClientSpec struct {
 	// +optional
 	DefaultToken string `json:"defaultToken,omitempty" toml:"default_token,omitempty"`
 	// +optional
+	DefaultTokenFrom ResourceFrom `json:"defaultTokenFrom,omitempty" toml:"-"`
+	// +optional
 	HeartbeatTimeout uint `json:"heartbeatTimeout,omitempty" toml:"heartbeat_timeout,omitempty"`
 	// +optional
 	RetryInterval uint `json:"retryInterval,omitempty" toml:"retry_interval,omitempty"`
 	// +optional
 	Transport RatholeClientSpecTransport `json:"transport,omitempty" toml:"transport,omitempty"`
 
-	// TODO: DefaultTokenFrom 필드 생성 필요
+	// +optional
+	Services map[string]*RatholeServiceSpec `json:"-" toml:"services,omitempty"`
 }
 
 // RatholeClientStatus defines the observed state of RatholeClient
