@@ -21,7 +21,6 @@ import (
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 	"strings"
 
@@ -36,9 +35,8 @@ import (
 // RatholeServerReconciler reconciles a RatholeServer object
 type RatholeServerReconciler struct {
 	client.Client
-	Scheme    *runtime.Scheme
-	Recorder  record.EventRecorder
-	Clientset *kubernetes.Clientset
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
 }
 
 const finalizerName = "rathole.superclass.io/server"
@@ -220,12 +218,12 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 					"config.toml": config,
 				},
 			}
-			if _, err := r.Clientset.CoreV1().Secrets(server.Namespace).Create(ctx, &secret, metav1.CreateOptions{}); err != nil {
+			if err := r.Create(ctx, &secret); err != nil {
 				return err
 			}
 		} else {
 			secret.StringData["config.toml"] = config
-			if _, err := r.Clientset.CoreV1().Secrets(server.Namespace).Update(ctx, &secret, metav1.UpdateOptions{}); err != nil {
+			if err := r.Update(ctx, &secret); err != nil {
 				return err
 			}
 		}
@@ -256,13 +254,12 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 					"config.toml": config,
 				},
 			}
-			if _, err := r.Clientset.CoreV1().ConfigMaps(server.Namespace).Create(ctx, &configMap, metav1.CreateOptions{}); err != nil {
+			if err := r.Create(ctx, &configMap); err != nil {
 				return err
 			}
 		} else {
 			configMap.Data["config.toml"] = config
-
-			if _, err := r.Clientset.CoreV1().ConfigMaps(server.Namespace).Update(ctx, &configMap, metav1.UpdateOptions{}); err != nil {
+			if err := r.Update(ctx, &configMap); err != nil {
 				return err
 			}
 		}
