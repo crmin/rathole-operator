@@ -104,6 +104,10 @@ func (r *RatholeServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
+	if server.Status.Condition.ObservedGeneration == server.Generation { // Skip if already reconciled. Spec hasn't changed
+		return nil
+	}
+
 	// Get services linked to this server
 	var services ratholev1alpha1.RatholeServiceList
 	if err := r.List(ctx, &services, client.InNamespace(server.Namespace)); err != nil {
@@ -170,6 +174,13 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 		}
 	}
 
+	server.Status.Condition.ObservedGeneration = server.Generation
+	server.Status.Condition.Status = "Synced"
+	server.Status.Condition.Reason = "Reconciled"
+	if err := r.Status().Update(ctx, server); err != nil {
+		return err
+	}
+
 	tomlParent := "server"
 	config, err := ConvertSpecToToml(&tomlParent, server.Spec)
 
@@ -195,7 +206,7 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 	case "secret":
 		var (
 			secret corev1.Secret
-			ok     bool
+			ok     = true
 		)
 
 		// search secret
@@ -231,7 +242,8 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 	case "configmap":
 		var (
 			configMap corev1.ConfigMap
-			ok        bool
+
+			ok = true
 		)
 
 		// search configmap
@@ -244,6 +256,7 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 
 		// if not exist, create configmap
 		if !ok {
+			println(">>>>>>>>>>>>> CONFIGMAP CREATE <<<<<<<<<<<<")
 			configMap = corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:            server.Spec.ConfigTarget.Name,
@@ -258,6 +271,7 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 				return err
 			}
 		} else {
+			println(">>>>>>>>>>>>> CONFIGMAP UPDATE <<<<<<<<<<<<")
 			configMap.Data["config.toml"] = config
 			if err := r.Update(ctx, &configMap); err != nil {
 				return err
