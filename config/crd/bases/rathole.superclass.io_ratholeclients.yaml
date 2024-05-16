@@ -340,6 +340,9 @@ spec:
                   lastSyncedTime:
                     format: date-time
                     type: string
+                  observedGeneration:
+                    format: int64
+                    type: integer
                   reason:
                     type: string
                   status:

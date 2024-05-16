@@ -48,8 +48,8 @@ type RatholeServiceSpec struct {
 type RatholeServiceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Status string `json:"status,omitempty"`
-	Reason string `json:"reason,omitempty"`
+	// +optional
+	Condition RatholeServiceStatusCondition `json:"condition,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -79,4 +79,11 @@ func init() {
 
 type RatholeServiceResourceRef struct {
 	Name string `json:"name" toml:"-"`
+}
+
+type RatholeServiceStatusCondition struct {
+	Status string `json:"status,omitempty"`
+	Reason string `json:"reason,omitempty"`
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }

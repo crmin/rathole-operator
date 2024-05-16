@@ -154,4 +154,6 @@ type RatholeClientStatusCondition struct {
 	Reason string `json:"reason,omitempty"`
 	// +optional
 	LastSyncedTime *metav1.Time `json:"lastSyncedTime,omitempty"`
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
