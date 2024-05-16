@@ -20,7 +20,10 @@ import (
 	"context"
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,8 +36,9 @@ import (
 // RatholeServerReconciler reconciles a RatholeServer object
 type RatholeServerReconciler struct {
 	client.Client
-	Scheme   *runtime.Scheme
-	Recorder record.EventRecorder
+	Scheme    *runtime.Scheme
+	Recorder  record.EventRecorder
+	Clientset *kubernetes.Clientset
 }
 
 const finalizerName = "rathole.superclass.io/server"
@@ -178,5 +182,90 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 	fmt.Printf("Config: %s\n", config)
 
 	// upsert config to configTarget
+	configResourceType := strings.ToLower(server.Spec.ConfigTarget.ResourceType)
+
+	ownerRefs := []metav1.OwnerReference{
+		{
+			APIVersion: server.APIVersion,
+			Kind:       server.Kind,
+			Name:       server.Name,
+			UID:        server.UID,
+		},
+	}
+
+	switch configResourceType {
+	case "secret":
+		var (
+			secret corev1.Secret
+			ok     bool
+		)
+
+		// search secret
+		if err := r.Get(ctx, client.ObjectKey{Namespace: server.Namespace, Name: server.Spec.ConfigTarget.Name}, &secret); err != nil {
+			if client.IgnoreNotFound(err) != nil {
+				return err
+			}
+			ok = false
+		}
+
+		// if not exist, create secret
+		if !ok {
+			secret = corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:            server.Spec.ConfigTarget.Name,
+					Namespace:       server.Namespace,
+					OwnerReferences: ownerRefs,
+				},
+				StringData: map[string]string{
+					"config.toml": config,
+				},
+			}
+			if _, err := r.Clientset.CoreV1().Secrets(server.Namespace).Create(ctx, &secret, metav1.CreateOptions{}); err != nil {
+				return err
+			}
+		} else {
+			secret.StringData["config.toml"] = config
+			if _, err := r.Clientset.CoreV1().Secrets(server.Namespace).Update(ctx, &secret, metav1.UpdateOptions{}); err != nil {
+				return err
+			}
+		}
+
+	case "configmap":
+		var (
+			configMap corev1.ConfigMap
+			ok        bool
+		)
+
+		// search configmap
+		if err := r.Get(ctx, client.ObjectKey{Namespace: server.Namespace, Name: server.Spec.ConfigTarget.Name}, &configMap); err != nil {
+			if client.IgnoreNotFound(err) != nil {
+				return err
+			}
+			ok = false
+		}
+
+		// if not exist, create configmap
+		if !ok {
+			configMap = corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:            server.Spec.ConfigTarget.Name,
+					Namespace:       server.Namespace,
+					OwnerReferences: ownerRefs,
+				},
+				Data: map[string]string{
+					"config.toml": config,
+				},
+			}
+			if _, err := r.Clientset.CoreV1().ConfigMaps(server.Namespace).Create(ctx, &configMap, metav1.CreateOptions{}); err != nil {
+				return err
+			}
+		} else {
+			configMap.Data["config.toml"] = config
+
+			if _, err := r.Clientset.CoreV1().ConfigMaps(server.Namespace).Update(ctx, &configMap, metav1.UpdateOptions{}); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

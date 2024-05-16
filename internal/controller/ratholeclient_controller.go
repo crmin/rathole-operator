@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,8 +32,9 @@ import (
 // RatholeClientReconciler reconciles a RatholeClient object
 type RatholeClientReconciler struct {
 	client.Client
-	Scheme   *runtime.Scheme
-	Recorder record.EventRecorder
+	Scheme    *runtime.Scheme
+	Recorder  record.EventRecorder
+	Clientset *kubernetes.Clientset
 }
 
 //+kubebuilder:rbac:groups=rathole.superclass.io,resources=ratholeclients,verbs=get;list;watch;create;update;patch;delete
