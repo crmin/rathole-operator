@@ -256,7 +256,6 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 
 		// if not exist, create configmap
 		if !ok {
-			println(">>>>>>>>>>>>> CONFIGMAP CREATE <<<<<<<<<<<<")
 			configMap = corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:            server.Spec.ConfigTarget.Name,
@@ -271,7 +270,6 @@ func (r *RatholeServerReconciler) ReconcileServer(ctx context.Context, server *r
 				return err
 			}
 		} else {
-			println(">>>>>>>>>>>>> CONFIGMAP UPDATE <<<<<<<<<<<<")
 			configMap.Data["config.toml"] = config
 			if err := r.Update(ctx, &configMap); err != nil {
 				return err
