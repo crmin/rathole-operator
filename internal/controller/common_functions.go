@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"github.com/pelletier/go-toml"
+	"bytes"
+	"github.com/pelletier/go-toml/v2"
 )
 
 func containsString(slice []string, s string) bool {
@@ -28,12 +29,29 @@ func ConvertSpecToToml(parent *string, spec interface{}) (string, error) {
 		err     error
 	)
 	if parent == nil {
-		content, err = toml.Marshal(spec)
+		//content, err = toml.Marshal(spec)
+		content, err = TomlMarshal(spec)
 	}
-	content, err = toml.Marshal(
+
+	//content, err = toml.Marshal(
+	//	map[string]interface{}{
+	//		*parent: spec,
+	//	},
+	//)
+	content, err = TomlMarshal(
 		map[string]interface{}{
 			*parent: spec,
 		},
 	)
 	return string(content), err
+}
+
+func TomlMarshal(data interface{}) ([]byte, error) {
+	buf := bytes.Buffer{}
+	enc := toml.NewEncoder(&buf)
+	enc.SetIndentTables(false)
+	if err := enc.Encode(data); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
