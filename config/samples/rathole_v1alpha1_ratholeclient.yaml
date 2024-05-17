@@ -8,5 +8,18 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: rathole-operator
   name: ratholeclient-sample
+  namespace: edge
 spec:
-  # TODO(user): Add fields here
+  configTarget:
+    resourceType: secret
+    name: edge-ssh-rathole-client-3379a116b93d9d5ddfbd5ff7e9f0663a
+  remoteAddr: 123.123.123.123:8000
+  defaultTokenFrom:
+    secretRef:
+      name: server-3379a116b93d9d5ddfbd5ff7e9f0663a
+      key: defaultToken
+  transport:
+    type: tcp
+    tcp:
+      nodelay: true
+      keepaliveSecs: 20
