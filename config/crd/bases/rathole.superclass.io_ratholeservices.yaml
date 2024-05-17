@@ -41,7 +41,7 @@ spec:
             properties:
               bindAddr:
                 type: string
-              clientRefs:
+              clientRef:
                 properties:
                   name:
                     type: string

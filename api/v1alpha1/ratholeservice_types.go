@@ -29,7 +29,7 @@ type RatholeServiceSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	ServerRef RatholeServiceResourceRef `json:"serverRef" toml:"-"`
 	// +optional
-	ClientRef RatholeServiceResourceRef `json:"clientRefs,omitempty" toml:"-"`
+	ClientRef RatholeServiceResourceRef `json:"clientRef,omitempty" toml:"-"`
 
 	// +optional
 	// +kubebuilder:validation:Enum=tcp;udp
