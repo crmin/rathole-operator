@@ -13,6 +13,8 @@ metadata:
 spec:
   serverRef:
     name: edge-ssh-3379a116b93d9d5ddfbd5ff7e9f0663a
+  clientRef:
+    name: ratholeclient-sample
   type: tcp
   token: service-token
   localAddr: 127.0.0.1:22

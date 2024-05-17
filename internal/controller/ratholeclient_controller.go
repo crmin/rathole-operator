@@ -76,7 +76,7 @@ func (r *RatholeClientReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}
 
-	if err := ReconcileClient(r, ctx, &client_); err != nil {
+	if err := ReconcileClient(r, ctx, &client_, false); err != nil {
 		client_.Status.Condition.Status = "Error"
 		client_.Status.Condition.Reason = err.Error()
 		if err := r.Status().Update(ctx, &client_); err != nil {

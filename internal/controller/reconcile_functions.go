@@ -20,8 +20,8 @@ type Reconciler interface {
 	Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error
 }
 
-func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
-	if server.Status.Condition.ObservedGeneration == server.Generation { // Skip if already reconciled. Spec hasn't changed
+func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer, forceReconcile bool) error {
+	if !forceReconcile && server.Status.Condition.ObservedGeneration == server.Generation { // Skip if already reconciled. Spec hasn't changed
 		return nil
 	}
 
@@ -95,7 +95,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	server.Status.Condition.Status = "Synced"
 	server.Status.Condition.Reason = "Reconciled"
 	// TODO: update last synced time
-	if err := r.Status().Update(ctx, server); err != nil {
+	if err := r.Status().Update(ctx, server.DeepCopy()); err != nil {
 		return err
 	}
 
@@ -151,6 +151,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 				return err
 			}
 		} else {
+			secret.StringData = make(map[string]string)
 			secret.StringData["config.toml"] = config
 			if err := r.Update(ctx, &secret); err != nil {
 				return err
@@ -197,8 +198,8 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	return nil
 }
 
-func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1.RatholeClient) error {
-	if client_.Status.Condition.ObservedGeneration == client_.Generation { // Skip if already reconciled. Spec hasn't changed
+func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1.RatholeClient, forceReconcile bool) error {
+	if !forceReconcile && client_.Status.Condition.ObservedGeneration == client_.Generation { // Skip if already reconciled. Spec hasn't changed
 		return nil
 	}
 
@@ -218,6 +219,7 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 		service.Spec.BindAddr = ""
 
 		client_.Spec.Services[service.ObjectMeta.Name] = &service.Spec
+		// POINT-1
 	}
 
 	if len(client_.Spec.Services) == 0 {
@@ -269,9 +271,10 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	client_.Status.Condition.Status = "Synced"
 	client_.Status.Condition.Reason = "Reconciled"
 	// TODO: update last synced time
-	if err := r.Status().Update(ctx, client_); err != nil {
+	if err := r.Status().Update(ctx, client_.DeepCopy()); err != nil {
 		return err
 	}
+	// POINT-2
 
 	tomlParent := "client"
 	config, err := ConvertSpecToToml(&tomlParent, client_.Spec)
@@ -325,6 +328,7 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 				return err
 			}
 		} else {
+			secret.StringData = make(map[string]string)
 			secret.StringData["config.toml"] = config
 			if err := r.Update(ctx, &secret); err != nil {
 				return err
@@ -368,5 +372,41 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 			}
 		}
 	}
+	return nil
+}
+
+func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha1.RatholeService) error {
+	if service.Status.Condition.ObservedGeneration == service.Generation { // Skip if already reconciled. Spec hasn't changed
+		return nil
+	}
+
+	service.Status.Condition.ObservedGeneration = service.Generation
+	service.Status.Condition.Status = "Synced"
+	service.Status.Condition.Reason = "Reconciled"
+
+	if err := r.Status().Update(ctx, service.DeepCopy()); err != nil {
+		return err
+	}
+
+	if service.Spec.ServerRef.Name != "" {
+		var server ratholev1alpha1.RatholeServer
+		if err := r.Get(ctx, client.ObjectKey{Namespace: service.Namespace, Name: service.Spec.ServerRef.Name}, &server); err != nil {
+			return err
+		}
+		if err := ReconcileServer(r, ctx, &server, true); err != nil {
+			return err
+		}
+	}
+
+	if service.Spec.ClientRef.Name != "" {
+		var client_ ratholev1alpha1.RatholeClient
+		if err := r.Get(ctx, client.ObjectKey{Namespace: service.Namespace, Name: service.Spec.ClientRef.Name}, &client_); err != nil {
+			return err
+		}
+		if err := ReconcileClient(r, ctx, &client_, true); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
