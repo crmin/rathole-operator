@@ -222,19 +222,18 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 		}
 	}
 
-	// NOTE: Client does not need default service
-	//if len(client_.Spec.Services) == 0 {
-	//	// Create dummy service
-	//	serviceSpec := &ratholev1alpha1.RatholeServiceSpec{
-	//		ServerRef: ratholev1alpha1.RatholeServiceResourceRef{
-	//			Name: client_.ObjectMeta.Name,
-	//		},
-	//		Type:     "tcp",
-	//		Token:    "default",
-	//		BindAddr: "0.0.0.0:3030",
-	//	}
-	//	client_.Spec.Services["dummy"] = serviceSpec
-	//}
+	if len(client_.Spec.Services) == 0 {
+		// Create dummy service
+		serviceSpec := &ratholev1alpha1.RatholeServiceSpec{
+			ServerRef: ratholev1alpha1.RatholeServiceResourceRef{
+				Name: client_.ObjectMeta.Name,
+			},
+			Type:      "tcp",
+			Token:     "default",
+			LocalAddr: "127.0.0.1:3030",
+		}
+		client_.Spec.Services["dummy"] = serviceSpec
+	}
 
 	// Set default token if set .Spec.DefaultTokenFrom and .Spec.DefaultToken is empty
 	// TODO: If both .Spec.DefaultTokenFrom and .Spec.DefaultToken are set, an error should occur through the webhook validate
