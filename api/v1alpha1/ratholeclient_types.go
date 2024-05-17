@@ -28,7 +28,7 @@ type RatholeClientSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// +optional
-	ConfigTarget RatholeConfigTarget `json:"configTarget,omitempty" toml:"config_target,omitempty"` // If not set, create random name secret
+	ConfigTarget RatholeConfigTarget `json:"configTarget,omitempty" toml:"-"` // If not set, create random name secret
 
 	RemoteAddr string `json:"remoteAddr" toml:"remote_addr"`
 	// +optional
