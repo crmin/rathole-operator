@@ -34,9 +34,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	server.Spec.Services = make(map[string]*ratholev1alpha1.RatholeServiceSpec)
 
 	for _, service := range services.Items {
-		fmt.Printf("############ service=%s\n", service.ObjectMeta.Name)
 		if service.Spec.ServerRef.Name != server.ObjectMeta.Name {
-			fmt.Printf("service ref=%s, server=%s\n", service.Spec.ServerRef.Name, server.ObjectMeta.Name)
 			continue
 		}
 		// remove client options
