@@ -211,15 +211,13 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	client_.Spec.Services = make(map[string]*ratholev1alpha1.RatholeServiceSpec)
 
 	for _, service := range services.Items {
-		for _, clientRef := range service.Spec.ClientRefs {
-			if clientRef.Name != client_.ObjectMeta.Name {
-				continue
-			}
-			// remove server options
-			service.Spec.BindAddr = ""
-
-			client_.Spec.Services[service.ObjectMeta.Name] = &service.Spec
+		if service.Spec.ClientRef.Name != client_.ObjectMeta.Name {
+			continue
 		}
+		// remove server options
+		service.Spec.BindAddr = ""
+
+		client_.Spec.Services[service.ObjectMeta.Name] = &service.Spec
 	}
 
 	if len(client_.Spec.Services) == 0 {

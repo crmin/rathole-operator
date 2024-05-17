@@ -42,14 +42,12 @@ spec:
               bindAddr:
                 type: string
               clientRefs:
-                items:
-                  properties:
-                    name:
-                      type: string
-                  required:
-                  - name
-                  type: object
-                type: array
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
               localAddr:
                 type: string
               nodelay:
