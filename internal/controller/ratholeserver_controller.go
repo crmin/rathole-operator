@@ -34,7 +34,7 @@ type RatholeServerReconciler struct {
 	Recorder record.EventRecorder
 }
 
-const finalizerName = "rathole.superclass.io/server"
+const serverFinalizerName = "rathole.superclass.io/server"
 
 //+kubebuilder:rbac:groups=rathole.superclass.io,resources=ratholeservers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rathole.superclass.io,resources=ratholeservers/status,verbs=get;update;patch
@@ -62,16 +62,16 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	if server.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add finalizer
-		if !containsString(server.ObjectMeta.Finalizers, finalizerName) {
-			server.ObjectMeta.Finalizers = append(server.ObjectMeta.Finalizers, finalizerName)
+		if !containsString(server.ObjectMeta.Finalizers, serverFinalizerName) {
+			server.ObjectMeta.Finalizers = append(server.ObjectMeta.Finalizers, serverFinalizerName)
 			if err := r.Update(ctx, &server); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
 	} else {
 		// Remove finalizer for deletion
-		if containsString(server.ObjectMeta.Finalizers, finalizerName) {
-			server.ObjectMeta.Finalizers = removeString(server.ObjectMeta.Finalizers, finalizerName)
+		if containsString(server.ObjectMeta.Finalizers, serverFinalizerName) {
+			server.ObjectMeta.Finalizers = removeString(server.ObjectMeta.Finalizers, serverFinalizerName)
 			if err := r.Update(ctx, &server); err != nil {
 				return ctrl.Result{}, err
 			}

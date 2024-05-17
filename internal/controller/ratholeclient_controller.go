@@ -35,6 +35,8 @@ type RatholeClientReconciler struct {
 	Recorder record.EventRecorder
 }
 
+const clientFinalizerName = "rathole.superclass.io/client"
+
 //+kubebuilder:rbac:groups=rathole.superclass.io,resources=ratholeclients,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rathole.superclass.io,resources=ratholeclients/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=rathole.superclass.io,resources=ratholeclients/finalizers,verbs=update
@@ -51,8 +53,38 @@ type RatholeClientReconciler struct {
 func (r *RatholeClientReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	var client_ ratholev1alpha1.RatholeClient
+	if err := r.Get(ctx, req.NamespacedName, &client_); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
+	if client_.ObjectMeta.DeletionTimestamp.IsZero() {
+		// Add finalizer
+		if !containsString(client_.ObjectMeta.Finalizers, clientFinalizerName) {
+			client_.ObjectMeta.Finalizers = append(client_.ObjectMeta.Finalizers, clientFinalizerName)
+			if err := r.Update(ctx, &client_); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+	} else {
+		// Remove finalizer for deletion
+		if containsString(client_.ObjectMeta.Finalizers, clientFinalizerName) {
+			client_.ObjectMeta.Finalizers = removeString(client_.ObjectMeta.Finalizers, clientFinalizerName)
+			if err := r.Update(ctx, &client_); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	if err := ReconcileClient(r, ctx, &client_); err != nil {
+		client_.Status.Condition.Status = "Error"
+		client_.Status.Condition.Reason = err.Error()
+		if err := r.Status().Update(ctx, &client_); err != nil {
+			return ctrl.Result{}, err
+		}
+		// Retry after 10 seconds
+		return ctrl.Result{RequeueAfter: 10}, nil
+	}
 	return ctrl.Result{}, nil
 }
 
