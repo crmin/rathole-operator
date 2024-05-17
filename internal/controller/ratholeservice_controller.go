@@ -76,6 +76,11 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 	}
 
+	// Skip if already reconciled. Spec hasn't changed
+	if service.Status.Condition.ObservedGeneration == service.Generation {
+		return ctrl.Result{}, nil
+	}
+
 	if err := ReconcileService(r, ctx, &service); err != nil {
 		service.Status.Condition.Status = "Error"
 		service.Status.Condition.Reason = err.Error()

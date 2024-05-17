@@ -20,11 +20,7 @@ type Reconciler interface {
 	Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error
 }
 
-func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer, forceReconcile bool) error {
-	if !forceReconcile && server.Status.Condition.ObservedGeneration == server.Generation { // Skip if already reconciled. Spec hasn't changed
-		return nil
-	}
-
+func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
 	// Get services linked to this server
 	var services ratholev1alpha1.RatholeServiceList
 	if err := r.List(ctx, &services, client.InNamespace(server.Namespace)); err != nil {
@@ -196,11 +192,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	return nil
 }
 
-func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1.RatholeClient, forceReconcile bool) error {
-	if !forceReconcile && client_.Status.Condition.ObservedGeneration == client_.Generation { // Skip if already reconciled. Spec hasn't changed
-		return nil
-	}
-
+func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1.RatholeClient) error {
 	// Get services linked to this server
 	var services ratholev1alpha1.RatholeServiceList
 	if err := r.List(ctx, &services, client.InNamespace(client_.Namespace)); err != nil {
@@ -374,10 +366,6 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 }
 
 func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha1.RatholeService) error {
-	if service.Status.Condition.ObservedGeneration == service.Generation { // Skip if already reconciled. Spec hasn't changed
-		return nil
-	}
-
 	service.Status.Condition.ObservedGeneration = service.Generation
 	service.Status.Condition.Status = "Synced"
 	service.Status.Condition.Reason = "Reconciled"
@@ -391,7 +379,7 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 		if err := r.Get(ctx, client.ObjectKey{Namespace: service.Namespace, Name: service.Spec.ServerRef.Name}, &server); err != nil {
 			return err
 		}
-		if err := ReconcileServer(r, ctx, &server, true); err != nil {
+		if err := ReconcileServer(r, ctx, &server); err != nil {
 			return err
 		}
 	}
@@ -401,7 +389,7 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 		if err := r.Get(ctx, client.ObjectKey{Namespace: service.Namespace, Name: service.Spec.ClientRef.Name}, &client_); err != nil {
 			return err
 		}
-		if err := ReconcileClient(r, ctx, &client_, true); err != nil {
+		if err := ReconcileClient(r, ctx, &client_); err != nil {
 			return err
 		}
 	}

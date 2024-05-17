@@ -78,7 +78,12 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}
 
-	if err := ReconcileServer(r, ctx, &server, false); err != nil {
+	// Skip if already reconciled. Spec hasn't changed
+	if server.Status.Condition.ObservedGeneration == server.Generation {
+		return ctrl.Result{}, nil
+	}
+
+	if err := ReconcileServer(r, ctx, &server); err != nil {
 		server.Status.Condition.Status = "Error"
 		server.Status.Condition.Reason = err.Error()
 		if err := r.Status().Update(ctx, &server); err != nil {
