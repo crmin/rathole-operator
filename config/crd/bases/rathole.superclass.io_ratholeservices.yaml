@@ -73,6 +73,7 @@ spec:
                 type: string
             required:
             - bindAddr
+            - clientRef
             - localAddr
             - serverRef
             type: object

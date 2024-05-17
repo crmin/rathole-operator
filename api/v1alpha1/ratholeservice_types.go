@@ -28,8 +28,7 @@ type RatholeServiceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	ServerRef RatholeServiceResourceRef `json:"serverRef" toml:"-"`
-	// +optional
-	ClientRef RatholeServiceResourceRef `json:"clientRef,omitempty" toml:"-"`
+	ClientRef RatholeServiceResourceRef `json:"clientRef" toml:"-"`
 
 	// +optional
 	// +kubebuilder:validation:Enum=tcp;udp
