@@ -120,6 +120,7 @@ type RatholeServerSpecTransportNoise struct {
 	// If .Spec.Transport.Type is "noise", this field must be set.
 	// +optional
 	Pattern string `json:"pattern,omitempty" toml:"pattern,omitempty"`
+	// If not set localPrivateKey and remotePublicKey, do not use auth
 	// +optional
 	LocalPrivateKey string `json:"localPrivateKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
 	// +optional
@@ -128,14 +129,6 @@ type RatholeServerSpecTransportNoise struct {
 	RemotePublicKey string `json:"remotePublicKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
 	// +optional
 	RemotePublicKeyFrom ResourceFrom `json:"remotePublicKeyFrom,omitempty" toml:"-"`
-
-	// TODO: Write hook for Validate; One of LocalPrivateKey or LocalPrivateKeyFrom must be set.
-	// TODO: If EncodedLocalPrivateKey was set, set LocalPrivateKey after base64 encoding.
-	// TODO: If LocalPrivateKeyFrom was set, read value LocalPrivateKeyFrom and encode to base64, set EncodedLocalPrivateKey.
-
-	// TODO: Write hook for Validate; One of RemotePublicKey or RemotePublicKeyFrom must be set.
-	// TODO: If EncodedRemotePublicKey was set, set RemotePublicKey after base64 encoding.
-	// TODO: If RemotePublicKeyFrom was set, read value RemotePublicKeyFrom and encode to base64, set EncodedRemotePublicKey.
 
 	// Field ignored in CRD generation. Used for internal logic.
 	// +kubebuilder:skipversion
