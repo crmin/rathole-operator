@@ -28,7 +28,7 @@ type RatholeClientSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// +optional
-	ConfigTarget RatholeConfigTarget `json:"configTarget,omitempty" toml:"-"` // If not set, create random name secret
+	ConfigTarget RatholeConfigTarget `json:"configTarget,omitempty" toml:"-"` // TODO: If not set, create random name secret
 
 	RemoteAddr string `json:"remoteAddr" toml:"remote_addr"`
 	// +optional
@@ -109,9 +109,9 @@ type RatholeClientSpecTransportTCP struct {
 
 type RatholeClientSpecTransportTLS struct {
 	// If .Spec.Transport.Type is "tls", this field must be set.
-	TrustedRootFrom ResourceFrom `json:"trustedRootFrom,omitempty" toml:"-"`
+	TrustedRootFrom ResourceFrom `json:"trustedRootFrom" toml:"-"`
 	// +optional
-	Hostname string `json:"hostname,omitempty" toml:"hostname,omitempty"`
+	Hostname string `json:"hostname,omitempty" toml:"hostname,omitempty"` // fallback to RemoteAddr
 
 	// Field ignored in CRD generation. Used for internal logic.
 	// +kubebuilder:skipversion

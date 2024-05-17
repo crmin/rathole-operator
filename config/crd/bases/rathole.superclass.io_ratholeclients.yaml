@@ -354,6 +354,8 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                         type: object
+                    required:
+                    - trustedRootFrom
                     type: object
                   type:
                     enum:
