@@ -28,7 +28,7 @@ type RatholeServerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// +optional
-	ConfigTarget RatholeConfigTarget `json:"configTarget,omitempty" toml:"-"` // If not set, create random name secret
+	ConfigTarget RatholeConfigTarget `json:"configTarget,omitempty" toml:"-"` // TODO: If not set, create random name secret
 
 	BindAddr string `json:"bindAddr" toml:"bind_addr"`
 	// +optional
@@ -121,11 +121,11 @@ type RatholeServerSpecTransportNoise struct {
 	// +optional
 	Pattern string `json:"pattern,omitempty" toml:"pattern,omitempty"`
 	// +optional
-	LocalPrivateKey ResourceFrom `json:"localPrivateKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
+	LocalPrivateKey string `json:"localPrivateKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
 	// +optional
 	LocalPrivateKeyFrom ResourceFrom `json:"localPrivateKeyFrom,omitempty" toml:"-"`
 	// +optional
-	RemotePublicKey ResourceFrom `json:"remotePublicKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
+	RemotePublicKey string `json:"remotePublicKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
 	// +optional
 	RemotePublicKeyFrom ResourceFrom `json:"remotePublicKeyFrom,omitempty" toml:"-"`
 
