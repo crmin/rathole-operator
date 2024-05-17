@@ -111,7 +111,7 @@ type RatholeClientSpecTransportTLS struct {
 	// If .Spec.Transport.Type is "tls", this field must be set.
 	TrustedRootFrom ResourceFrom `json:"trustedRootFrom" toml:"-"`
 	// +optional
-	Hostname string `json:"hostname,omitempty" toml:"hostname,omitempty"` // fallback to RemoteAddr
+	Hostname string `json:"hostname,omitempty" toml:"hostname,omitempty"` // fallback to RemoteAddr (necessary field)
 
 	// Field ignored in CRD generation. Used for internal logic.
 	// +kubebuilder:skipversion
@@ -123,21 +123,13 @@ type RatholeClientSpecTransportNoise struct {
 	// +optional
 	Pattern string `json:"pattern,omitempty" toml:"pattern,omitempty"`
 	// +optional
-	LocalPrivateKey ResourceFrom `json:"localPrivateKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
+	LocalPrivateKey string `json:"localPrivateKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
 	// +optional
 	LocalPrivateKeyFrom ResourceFrom `json:"localPrivateKeyFrom,omitempty" toml:"-"`
 	// +optional
-	RemotePublicKey ResourceFrom `json:"remotePublicKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
+	RemotePublicKey string `json:"remotePublicKey,omitempty" toml:"-"` // Set plain text, not base64 encoded
 	// +optional
 	RemotePublicKeyFrom ResourceFrom `json:"remotePublicKeyFrom,omitempty" toml:"-"`
-
-	// TODO: Write hook for Validate; One of LocalPrivateKey or LocalPrivateKeyFrom must be set.
-	// TODO: If EncodedLocalPrivateKey was set, set LocalPrivateKey after base64 encoding.
-	// TODO: If LocalPrivateKeyFrom was set, read value LocalPrivateKeyFrom and encode to base64, set EncodedLocalPrivateKey.
-
-	// TODO: Write hook for Validate; One of RemotePublicKey or RemotePublicKeyFrom must be set.
-	// TODO: If EncodedRemotePublicKey was set, set RemotePublicKey after base64 encoding.
-	// TODO: If RemotePublicKeyFrom was set, read value RemotePublicKeyFrom and encode to base64, set EncodedRemotePublicKey.
 
 	// Field ignored in CRD generation. Used for internal logic.
 	// +kubebuilder:skipversion
