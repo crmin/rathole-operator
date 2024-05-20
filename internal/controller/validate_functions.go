@@ -71,6 +71,17 @@ func ValidateClient(r *v1alpha1.RatholeClient) error {
 	}
 
 	switch r.Spec.Transport.Type {
+	case "tls":
+		if r.Spec.Transport.TLS == nil {
+			return fmt.Errorf("tls transport requires .spec.transport.tls configuration")
+		}
+		trustedRootFromSet := r.Spec.Transport.TLS.TrustedRootFrom.ConfigMapRef.Name != "" || r.Spec.Transport.TLS.TrustedRootFrom.SecretRef.Name != ""
+		trustedRootSet := r.Spec.Transport.TLS.TrustedRoot != ""
+		if trustedRootSet && trustedRootFromSet {
+			return fmt.Errorf(".spec.transport.tls.trustedRoot and .spec.transport.tls.trustedRootFrom cannot be set at the same time")
+		} else if !trustedRootSet && !trustedRootFromSet {
+			return fmt.Errorf("tls transport requires .spec.transport.tls.trustedRoot or .spec.transport.tls.trustedRootFrom")
+		}
 	case "noise":
 		if r.Spec.Transport.Noise == nil {
 			return fmt.Errorf("noise transport requires .spec.transport.noise configuration")

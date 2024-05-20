@@ -224,9 +224,12 @@ spec:
                     properties:
                       hostname:
                         type: string
+                      trustedRoot:
+                        type: string
                       trustedRootFrom:
-                        description: If .Spec.Transport.Type is "tls", this field
-                          must be set.
+                        description: |-
+                          If .Spec.Transport.Type is "tls", this field must be set.
+                          One of TrustedRootFrom and TrustedRoot must be set.
                         properties:
                           configMapRef:
                             description: Selects a key from a ConfigMap.
@@ -270,8 +273,6 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                         type: object
-                    required:
-                    - trustedRootFrom
                     type: object
                   type:
                     enum:

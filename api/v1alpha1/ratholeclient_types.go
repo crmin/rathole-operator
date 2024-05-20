@@ -109,13 +109,13 @@ type RatholeClientSpecTransportTCP struct {
 
 type RatholeClientSpecTransportTLS struct {
 	// If .Spec.Transport.Type is "tls", this field must be set.
-	TrustedRootFrom ResourceFrom `json:"trustedRootFrom" toml:"-"`
+	// One of TrustedRootFrom and TrustedRoot must be set.
+	// +optional
+	TrustedRootFrom ResourceFrom `json:"trustedRootFrom,omitempty" toml:"-"`
+	// +optional
+	TrustedRoot string `json:"trustedRoot,omitempty" toml:"trusted_root"` // Make temp file using TrustedRootFrom and set temp file path
 	// +optional
 	Hostname string `json:"hostname,omitempty" toml:"hostname,omitempty"` // fallback to RemoteAddr (necessary field)
-
-	// Field ignored in CRD generation. Used for internal logic.
-	// +kubebuilder:skipversion
-	TrustedRoot string `json:"-" toml:"trusted_root"` // Make temp file using TrustedRootFrom and set temp file path
 }
 
 type RatholeClientSpecTransportNoise struct {
