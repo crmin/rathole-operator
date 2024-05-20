@@ -110,10 +110,19 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 		}
 	}
 
+	// If not set .Spec.ConfigTarget, set random name of secret
+	if server.Spec.ConfigTarget.ResourceType == "" {
+		server.Spec.ConfigTarget.ResourceType = "secret"
+	}
+	if server.Spec.ConfigTarget.Name == "" {
+		server.Spec.ConfigTarget.Name = fmt.Sprintf("rathole-server-config-%s", GetSuffix(5))
+	}
+
 	server.Status.Condition.ObservedGeneration = server.Generation
 	server.Status.Condition.Status = "Synced"
 	server.Status.Condition.Reason = "Reconciled"
 	server.Status.Condition.LastSyncedTime = &metav1.Time{Time: time.Now()}
+	server.Status.ConfigTarget = *server.Spec.ConfigTarget.DeepCopy()
 	if err := r.Status().Update(ctx, server.DeepCopy()); err != nil {
 		return err
 	}
@@ -299,14 +308,21 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 		}
 	}
 
+	if client_.Spec.ConfigTarget.ResourceType == "" {
+		client_.Spec.ConfigTarget.ResourceType = "secret"
+	}
+	if client_.Spec.ConfigTarget.Name == "" {
+		client_.Spec.ConfigTarget.Name = fmt.Sprintf("rathole-client-config-%s", GetSuffix(5))
+	}
+
 	client_.Status.Condition.ObservedGeneration = client_.Generation
 	client_.Status.Condition.Status = "Synced"
 	client_.Status.Condition.Reason = "Reconciled"
 	client_.Status.Condition.LastSyncedTime = &metav1.Time{Time: time.Now()}
+	client_.Status.ConfigTarget = *client_.Spec.ConfigTarget.DeepCopy()
 	if err := r.Status().Update(ctx, client_.DeepCopy()); err != nil {
 		return err
 	}
-	// POINT-2
 
 	tomlParent := "client"
 	config, err := ConvertSpecToToml(&tomlParent, client_.Spec)

@@ -3,6 +3,8 @@ package controller
 import (
 	"bytes"
 	"github.com/pelletier/go-toml/v2"
+	"math/rand"
+	"time"
 )
 
 func containsString(slice []string, s string) bool {
@@ -54,4 +56,18 @@ func TomlMarshal(data interface{}) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func GetSuffix(length int) string {
+	charset := "abcdefghijklmnopqrstuvwxyz0123456789"
+
+	seed := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(seed)
+
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[r.Intn(len(charset))]
+	}
+
+	return string(result)
 }
