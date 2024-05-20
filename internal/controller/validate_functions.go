@@ -103,6 +103,8 @@ func ValidateClient(r *v1alpha1.RatholeClient) error {
 }
 
 func ValidateService(r *v1alpha1.RatholeService, server *v1alpha1.RatholeServer, client *v1alpha1.RatholeClient) error {
+	// Note: Need check server and client exist?
+
 	tokenSet := r.Spec.Token != ""
 	clientDefaultTokenSet := client.Spec.DefaultToken != ""
 	if !tokenSet && !clientDefaultTokenSet {
