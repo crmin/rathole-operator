@@ -149,7 +149,7 @@ type RatholeServerSpecTransportWebsocket struct {
 
 type RatholeServerSpecDeployment struct {
 	// +optional
-	NodeSelector v1.NodeSelector `json:"nodeSelector,omitempty" toml:"-"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" toml:"-"`
 	// +optional
 	NodeAffinity v1.NodeAffinity `json:"nodeAffinity,omitempty" toml:"-"`
 }
