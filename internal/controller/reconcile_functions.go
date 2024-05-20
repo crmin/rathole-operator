@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
@@ -506,9 +507,7 @@ func ReadConfig(r Reconciler, ctx context.Context, namespace string, resourceFro
 func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
 	var replicas int32 = 1
 
-	var (
-		serverConfVolumeSrc corev1.VolumeSource
-	)
+	var serverConfVolumeSrc corev1.VolumeSource
 	if server.Spec.ConfigTarget.ResourceType == "secret" {
 		serverConfVolumeSrc = corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
@@ -536,6 +535,51 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 			Name:       server.Name,
 			UID:        server.UID,
 		},
+	}
+
+	volumes := []corev1.Volume{
+		serverConfVolume,
+	}
+
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name:      "config",
+			MountPath: "/var/run/config.toml",
+			SubPath:   "config.toml",
+		},
+	}
+
+	// TODO: Add secret and configmap volume
+	// pkcs12
+	if server.Spec.Transport.Type == "tls" {
+		if server.Spec.Transport.TLS.PKCS12 != "" {
+			var pkcs12VolumeSrc corev1.VolumeSource
+			if server.Spec.Transport.TLS.PKCS12From.SecretRef.Name != "" {
+				pkcs12VolumeSrc = corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: server.Spec.Transport.TLS.PKCS12From.SecretRef.Name,
+					},
+				}
+			} else if server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name != "" {
+				pkcs12VolumeSrc = corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name,
+						},
+					},
+				}
+			}
+			volumes = append(volumes, corev1.Volume{
+				Name:         "pkcs12",
+				VolumeSource: pkcs12VolumeSrc,
+			})
+			pkcs12Name := filepath.Base(server.Spec.Transport.TLS.PKCS12)
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      "pkcs12",
+				MountPath: server.Spec.Transport.TLS.PKCS12,
+				SubPath:   pkcs12Name,
+			})
+		}
 	}
 
 	deploy := v1.Deployment{
@@ -569,22 +613,14 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 								"--server",
 								"/var/run/config.toml",
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "config",
-									MountPath: "/var/run/config.toml",
-									SubPath:   "config.toml",
-								},
-							},
+							VolumeMounts: volumeMounts,
 						},
 					},
 					NodeSelector: server.Spec.Deployment.NodeSelector,
 					Affinity: &corev1.Affinity{
 						NodeAffinity: &server.Spec.Deployment.NodeAffinity,
 					},
-					Volumes: []corev1.Volume{
-						serverConfVolume,
-					},
+					Volumes: volumes,
 				},
 			},
 		},
