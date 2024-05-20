@@ -68,6 +68,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	if server.Spec.Transport.Type == "tls" {
 		var err error
 		//pkcs12 -> filename
+		//TODO: secret 말고 configmap도 지원해야함
 		filePath := fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
 		server.Spec.Transport.TLS.PKCS12 = filePath
 
@@ -243,6 +244,43 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 		var err error
 		if client_.Spec.DefaultToken, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.DefaultTokenFrom); err != nil {
 			return err
+		}
+	}
+
+	// Read PKCS12 content from PKCS12From field and set to PKCS12 field
+	if client_.Spec.Transport.Type == "tls" {
+		var confName string
+
+		if client_.Spec.Transport.TLS.TrustedRoot == "" {
+			if client_.Spec.Transport.TLS.TrustedRootFrom.SecretRef.Name != "" {
+				confName = client_.Spec.Transport.TLS.TrustedRootFrom.SecretRef.Name
+			} else if client_.Spec.Transport.TLS.TrustedRootFrom.ConfigMapRef.Name != "" {
+				confName = client_.Spec.Transport.TLS.TrustedRootFrom.ConfigMapRef.Name
+			}
+
+			// trustedRoot -> filename
+			filePath := fmt.Sprintf("%s/%s", ratholeSecretRoot, confName)
+			client_.Spec.Transport.TLS.TrustedRoot = filePath
+		}
+	} else if client_.Spec.Transport.Type == "noise" {
+		var err error
+		if client_.Spec.Transport.Noise.LocalPrivateKey == "" && (client_.Spec.Transport.Noise.LocalPrivateKeyFrom.ConfigMapRef.Name != "" || client_.Spec.Transport.Noise.LocalPrivateKeyFrom.SecretRef.Name != "") {
+			if client_.Spec.Transport.Noise.LocalPrivateKey, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.Transport.Noise.LocalPrivateKeyFrom); err != nil {
+				return err
+			}
+		}
+		if client_.Spec.Transport.Noise.RemotePublicKey == "" && (client_.Spec.Transport.Noise.RemotePublicKeyFrom.ConfigMapRef.Name != "" || client_.Spec.Transport.Noise.RemotePublicKeyFrom.SecretRef.Name != "") {
+			if client_.Spec.Transport.Noise.RemotePublicKey, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.Transport.Noise.RemotePublicKeyFrom); err != nil {
+				return err
+			}
+		}
+
+		// If exist localPrivateKey and remotePublicKey, encode to base64
+		if client_.Spec.Transport.Noise.LocalPrivateKey != "" {
+			client_.Spec.Transport.Noise.EncodedLocalPrivateKey = base64.StdEncoding.EncodeToString([]byte(client_.Spec.Transport.Noise.LocalPrivateKey))
+		}
+		if client_.Spec.Transport.Noise.RemotePublicKey != "" {
+			client_.Spec.Transport.Noise.EncodedRemotePublicKey = base64.StdEncoding.EncodeToString([]byte(client_.Spec.Transport.Noise.RemotePublicKey))
 		}
 	}
 
