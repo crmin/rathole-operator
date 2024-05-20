@@ -3,9 +3,15 @@ package controller
 import (
 	"fmt"
 	"github.com/crmin/rathole-operator/api/v1alpha1"
+	"strings"
 )
 
 func ValidateServer(r *v1alpha1.RatholeServer) error {
+	bindAddr := r.Spec.BindAddr
+	if len(strings.Split(bindAddr, ":")) != 2 {
+		return fmt.Errorf("bindAddr must be in the form of ip:port")
+	}
+
 	defaultTokenSet := r.Spec.DefaultToken != ""
 	defaultTokenFromSet := r.Spec.DefaultTokenFrom.ConfigMapRef.Name != "" || r.Spec.DefaultTokenFrom.SecretRef.Name != ""
 	if defaultTokenSet && defaultTokenFromSet {
