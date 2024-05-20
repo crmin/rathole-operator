@@ -5,10 +5,13 @@ import (
 	"encoding/base64"
 	"fmt"
 	ratholev1alpha1 "github.com/crmin/rathole-operator/api/v1alpha1"
+	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -223,6 +226,11 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 			}
 		}
 	}
+
+	if err := CreateServerDeployment(r, ctx, server); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -493,4 +501,128 @@ func ReadConfig(r Reconciler, ctx context.Context, namespace string, resourceFro
 		return configContent, nil
 	}
 	return "", fmt.Errorf("resourceFrom is not set")
+}
+
+func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
+	var replicas int32 = 1
+
+	var (
+		serverConfVolumeSrc corev1.VolumeSource
+	)
+	if server.Spec.ConfigTarget.ResourceType == "secret" {
+		serverConfVolumeSrc = corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: server.Spec.ConfigTarget.Name,
+			},
+		}
+	} else if server.Spec.ConfigTarget.ResourceType == "configmap" {
+		serverConfVolumeSrc = corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: server.Spec.ConfigTarget.Name,
+				},
+			},
+		}
+	}
+	serverConfVolume := corev1.Volume{
+		Name:         "config",
+		VolumeSource: serverConfVolumeSrc,
+	}
+
+	ownerRefs := []metav1.OwnerReference{
+		{
+			APIVersion: server.APIVersion,
+			Kind:       server.Kind,
+			Name:       server.Name,
+			UID:        server.UID,
+		},
+	}
+
+	deploy := v1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            server.ObjectMeta.Name,
+			Namespace:       server.Namespace,
+			OwnerReferences: ownerRefs,
+		},
+		Spec: v1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app":     server.ObjectMeta.Name,
+					"service": "rathole-server",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app":     server.ObjectMeta.Name,
+						"service": "rathole-server",
+					},
+				},
+				Spec: corev1.PodSpec{
+					HostNetwork: true,
+					Containers: []corev1.Container{
+						{
+							Name:  "rathole-server",
+							Image: "crmin/rathole:v0.5.0-debug",
+							Args: []string{
+								"--server",
+								"/var/run/config.toml",
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "config",
+									MountPath: "/var/run/config.toml",
+									SubPath:   "config.toml",
+								},
+							},
+						},
+					},
+					NodeSelector: server.Spec.Deployment.NodeSelector,
+					Affinity: &corev1.Affinity{
+						NodeAffinity: &server.Spec.Deployment.NodeAffinity,
+					},
+					Volumes: []corev1.Volume{
+						serverConfVolume,
+					},
+				},
+			},
+		},
+	}
+
+	if err := r.Create(ctx, deploy.DeepCopy()); err != nil {
+		return err
+	}
+
+	serverPort, err := strconv.Atoi(strings.Split(server.Spec.BindAddr, ":")[1])
+	if err != nil {
+		return err
+	}
+
+	service := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            server.ObjectMeta.Name,
+			Namespace:       server.Namespace,
+			OwnerReferences: ownerRefs,
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{
+				"app":     server.ObjectMeta.Name,
+				"service": "rathole-server",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "rathole",
+					Port:       int32(serverPort),
+					TargetPort: intstr.IntOrString{IntVal: int32(serverPort)},
+				},
+			},
+		},
+	}
+
+	if err := r.Create(ctx, service.DeepCopy()); err != nil {
+		return err
+	}
+
+	return nil
 }
