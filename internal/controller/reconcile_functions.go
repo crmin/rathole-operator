@@ -7,7 +7,6 @@ import (
 	ratholev1alpha1 "github.com/crmin/rathole-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
@@ -67,29 +66,9 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 
 	// Read PKCS12 content from PKCS12From field and set to PKCS12 field
 	if server.Spec.Transport.Type == "tls" {
-		var (
-			pkcsContent string
-			err         error
-		)
+		var err error
 		//pkcs12 -> filename
-		fileDir := fmt.Sprintf("%s/%s/%s", ratholeSecretRoot, server.Namespace, server.Name)
-		filePath := fmt.Sprintf("%s/%s", fileDir, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
-		if pkcsContent, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12From); err != nil {
-			return err
-		}
-
-		// Create directory if not exist
-		if _, err := os.Stat(fileDir); os.IsNotExist(err) {
-			if err := os.MkdirAll(fileDir, 0755); err != nil {
-				return err
-			}
-		}
-
-		// Write pkcs12 content to file
-		if err := os.WriteFile(filePath, []byte(pkcsContent), 0644); err != nil {
-			return err
-		}
-
+		filePath := fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
 		server.Spec.Transport.TLS.PKCS12 = filePath
 
 		if server.Spec.Transport.TLS.PKCS12Password == "" {
@@ -260,7 +239,6 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	}
 
 	// Set default token if set .Spec.DefaultTokenFrom and .Spec.DefaultToken is empty
-	// TODO: If both .Spec.DefaultTokenFrom and .Spec.DefaultToken are set, an error should occur through the webhook validate
 	if client_.Spec.DefaultToken == "" {
 		var err error
 		if client_.Spec.DefaultToken, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.DefaultTokenFrom); err != nil {
