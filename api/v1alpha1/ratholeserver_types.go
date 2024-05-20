@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -39,6 +40,12 @@ type RatholeServerSpec struct {
 	HeartbeatInterval uint `json:"heartbeatInterval,omitempty" toml:"heartbeat_interval,omitempty"`
 	// +optional
 	Transport RatholeServerSpecTransport `json:"transport,omitempty" toml:"transport,omitempty"`
+
+	// For server deployment
+	// +optional
+	NodeSelector v1.NodeSelector `json:"nodeSelector,omitempty" toml:"-"`
+	// +optional
+	NodeAffinity v1.NodeAffinity `json:"nodeAffinity,omitempty" toml:"-"`
 
 	// +optional
 	Services map[string]*RatholeServiceSpec `json:"-" toml:"services,omitempty"`
