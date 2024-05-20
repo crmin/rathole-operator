@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	ratholev1alpha1 "github.com/crmin/rathole-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -71,6 +72,26 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 			if server.Spec.Transport.TLS.PKCS12Password, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12PasswordFrom); err != nil {
 				return err
 			}
+		}
+	} else if server.Spec.Transport.Type == "noise" {
+		var err error
+		if server.Spec.Transport.Noise.LocalPrivateKey == "" && (server.Spec.Transport.Noise.LocalPrivateKeyFrom.ConfigMapRef.Name != "" || server.Spec.Transport.Noise.LocalPrivateKeyFrom.SecretRef.Name != "") {
+			if server.Spec.Transport.Noise.LocalPrivateKey, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.Noise.LocalPrivateKeyFrom); err != nil {
+				return err
+			}
+		}
+		if server.Spec.Transport.Noise.RemotePublicKey == "" && (server.Spec.Transport.Noise.RemotePublicKeyFrom.ConfigMapRef.Name != "" || server.Spec.Transport.Noise.RemotePublicKeyFrom.SecretRef.Name != "") {
+			if server.Spec.Transport.Noise.RemotePublicKey, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.Noise.RemotePublicKeyFrom); err != nil {
+				return err
+			}
+		}
+
+		// If exist localPrivateKey and remotePublicKey, encode to base64
+		if server.Spec.Transport.Noise.LocalPrivateKey != "" {
+			server.Spec.Transport.Noise.EncodedLocalPrivateKey = base64.StdEncoding.EncodeToString([]byte(server.Spec.Transport.Noise.LocalPrivateKey))
+		}
+		if server.Spec.Transport.Noise.RemotePublicKey != "" {
+			server.Spec.Transport.Noise.EncodedRemotePublicKey = base64.StdEncoding.EncodeToString([]byte(server.Spec.Transport.Noise.RemotePublicKey))
 		}
 	}
 

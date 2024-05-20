@@ -132,9 +132,9 @@ type RatholeServerSpecTransportNoise struct {
 
 	// Field ignored in CRD generation. Used for internal logic.
 	// +kubebuilder:skipversion
-	EncodedLocalPrivateKey string `json:"-" toml:"local_private_key,omitempty"` // Make temp file using LocalPrivateKeyFrom and set temp file path
+	EncodedLocalPrivateKey string `json:"-" toml:"local_private_key,omitempty"` // Base64 encoded value. Make temp file using LocalPrivateKeyFrom and set temp file path
 	// +kubebuilder:skipversion
-	EncodedRemotePublicKey string `json:"-" toml:"remote_public_key,omitempty"` // Make temp file using RemotePublicKeyFrom and set temp file path
+	EncodedRemotePublicKey string `json:"-" toml:"remote_public_key,omitempty"` // Base64 encoded value. Make temp file using RemotePublicKeyFrom and set temp file path
 }
 
 type RatholeServerSpecTransportWebsocket struct {
