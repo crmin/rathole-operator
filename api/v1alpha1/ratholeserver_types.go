@@ -105,7 +105,7 @@ type RatholeServerSpecTransportTCP struct {
 
 type RatholeServerSpecTransportTLS struct {
 	// If .Spec.Transport.Type is "tls", this field must be set.
-	PKCS12From ResourceFrom `json:"pkcs12From,omitempty" toml:"-"`
+	PKCS12From ResourceFrom `json:"pkcs12From" toml:"-"` // necessary, PKCS12 is file path
 	// +optional
 	PKCS12Password     string       `json:"pkcs12Password,omitempty" toml:"pkcs12_password,omitempty"`
 	PKCS12PasswordFrom ResourceFrom `json:"pkcs12PasswordFrom,omitempty" toml:"-"`

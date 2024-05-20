@@ -312,6 +312,8 @@ spec:
                             type: object
                             x-kubernetes-map-type: atomic
                         type: object
+                    required:
+                    - pkcs12From
                     type: object
                   type:
                     enum:
