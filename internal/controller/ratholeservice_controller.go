@@ -60,16 +60,16 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	if service.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add finalizer
-		if !containsString(service.ObjectMeta.Finalizers, clientFinalizerName) {
-			service.ObjectMeta.Finalizers = append(service.ObjectMeta.Finalizers, clientFinalizerName)
+		if !containsString(service.ObjectMeta.Finalizers, serviceFinalizerName) {
+			service.ObjectMeta.Finalizers = append(service.ObjectMeta.Finalizers, serviceFinalizerName)
 			if err := r.Update(ctx, &service); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
 	} else {
 		// Remove finalizer for deletion
-		if containsString(service.ObjectMeta.Finalizers, clientFinalizerName) {
-			service.ObjectMeta.Finalizers = removeString(service.ObjectMeta.Finalizers, clientFinalizerName)
+		if containsString(service.ObjectMeta.Finalizers, serviceFinalizerName) {
+			service.ObjectMeta.Finalizers = removeString(service.ObjectMeta.Finalizers, serviceFinalizerName)
 			if err := r.Update(ctx, &service); err != nil {
 				return ctrl.Result{}, err
 			}
