@@ -43,9 +43,7 @@ type RatholeServerSpec struct {
 
 	// For server deployment
 	// +optional
-	NodeSelector v1.NodeSelector `json:"nodeSelector,omitempty" toml:"-"`
-	// +optional
-	NodeAffinity v1.NodeAffinity `json:"nodeAffinity,omitempty" toml:"-"`
+	Deployment RatholeServerSpecDeployment `json:"deployment,omitempty" toml:"-"`
 
 	// +optional
 	Services map[string]*RatholeServiceSpec `json:"-" toml:"services,omitempty"`
@@ -147,6 +145,13 @@ type RatholeServerSpecTransportNoise struct {
 type RatholeServerSpecTransportWebsocket struct {
 	// If .Spec.Transport.Type is "websocket", this field must be set.
 	TLS bool `json:"tls,omitempty" toml:"tls,omitempty"` // necessary
+}
+
+type RatholeServerSpecDeployment struct {
+	// +optional
+	NodeSelector v1.NodeSelector `json:"nodeSelector,omitempty" toml:"-"`
+	// +optional
+	NodeAffinity v1.NodeAffinity `json:"nodeAffinity,omitempty" toml:"-"`
 }
 
 type RatholeServerStatusCondition struct {
