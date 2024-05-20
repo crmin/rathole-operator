@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+const ratholeSecretRoot = "/var/run/secrets/rathole"
+
 type Reconciler interface {
 	Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error)
 	Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error
@@ -70,7 +72,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 			err         error
 		)
 		//pkcs12 -> filename
-		fileDir := fmt.Sprintf("/var/run/secrets/%s/%s", server.Namespace, server.Name)
+		fileDir := fmt.Sprintf("%s/%s/%s", ratholeSecretRoot, server.Namespace, server.Name)
 		filePath := fmt.Sprintf("%s/%s", fileDir, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
 		if pkcsContent, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12From); err != nil {
 			return err
