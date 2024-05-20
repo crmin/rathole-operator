@@ -7,6 +7,7 @@ import (
 	ratholev1alpha1 "github.com/crmin/rathole-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
@@ -64,10 +65,31 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 
 	// Read PKCS12 content from PKCS12From field and set to PKCS12 field
 	if server.Spec.Transport.Type == "tls" {
-		var err error
-		if server.Spec.Transport.TLS.PKCS12, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12From); err != nil {
+		var (
+			pkcsContent string
+			err         error
+		)
+		//pkcs12 -> filename
+		fileDir := fmt.Sprintf("/var/run/secrets/%s/%s", server.Namespace, server.Name)
+		filePath := fmt.Sprintf("%s/%s", fileDir, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
+		if pkcsContent, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12From); err != nil {
 			return err
 		}
+
+		// Create directory if not exist
+		if _, err := os.Stat(fileDir); os.IsNotExist(err) {
+			if err := os.MkdirAll(fileDir, 0755); err != nil {
+				return err
+			}
+		}
+
+		// Write pkcs12 content to file
+		if err := os.WriteFile(filePath, []byte(pkcsContent), 0644); err != nil {
+			return err
+		}
+
+		server.Spec.Transport.TLS.PKCS12 = filePath
+
 		if server.Spec.Transport.TLS.PKCS12Password == "" {
 			if server.Spec.Transport.TLS.PKCS12Password, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12PasswordFrom); err != nil {
 				return err
