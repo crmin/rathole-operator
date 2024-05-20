@@ -54,34 +54,23 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	}
 
 	// Set default token if set .Spec.DefaultTokenFrom and .Spec.DefaultToken is empty
-	// TODO: If both .Spec.DefaultTokenFrom and .Spec.DefaultToken are set, an error should occur through the webhook validate
 	if server.Spec.DefaultToken == "" {
-		if server.Spec.DefaultTokenFrom.ConfigMapRef.Name != "" { // Use ConfigMap
-			var (
-				configMap corev1.ConfigMap
-				ok        bool
-			)
-			if err := r.Get(ctx, client.ObjectKey{Namespace: server.Namespace, Name: server.Spec.DefaultTokenFrom.ConfigMapRef.Name}, &configMap); err != nil {
+		var err error
+		if server.Spec.DefaultToken, err = ReadConfig(r, ctx, server.Namespace, server.Spec.DefaultTokenFrom); err != nil {
+			return err
+		}
+	}
+
+	// Read PKCS12 content from PKCS12From field and set to PKCS12 field
+	if server.Spec.Transport.Type == "tls" {
+		var err error
+		if server.Spec.Transport.TLS.PKCS12, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12From); err != nil {
+			return err
+		}
+		if server.Spec.Transport.TLS.PKCS12Password == "" {
+			if server.Spec.Transport.TLS.PKCS12Password, err = ReadConfig(r, ctx, server.Namespace, server.Spec.Transport.TLS.PKCS12PasswordFrom); err != nil {
 				return err
 			}
-			server.Spec.DefaultToken, ok = configMap.Data[server.Spec.DefaultTokenFrom.ConfigMapRef.Key]
-			if !ok {
-				return fmt.Errorf("key %s not found in configmap %s", server.Spec.DefaultTokenFrom.ConfigMapRef.Key, server.Spec.DefaultTokenFrom.ConfigMapRef.Name)
-			}
-		} else if server.Spec.DefaultTokenFrom.SecretRef.Name != "" { // Use Secret
-			var (
-				secret        corev1.Secret
-				secretContent []byte
-				ok            bool
-			)
-			if err := r.Get(ctx, client.ObjectKey{Namespace: server.Namespace, Name: server.Spec.DefaultTokenFrom.SecretRef.Name}, &secret); err != nil {
-				return err
-			}
-			secretContent, ok = secret.Data[server.Spec.DefaultTokenFrom.SecretRef.Key]
-			if !ok {
-				return fmt.Errorf("key %s not found in secret %s", server.Spec.DefaultTokenFrom.SecretRef.Key, server.Spec.DefaultTokenFrom.SecretRef.Name)
-			}
-			server.Spec.DefaultToken = string(secretContent)
 		}
 	}
 
@@ -228,32 +217,9 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	// Set default token if set .Spec.DefaultTokenFrom and .Spec.DefaultToken is empty
 	// TODO: If both .Spec.DefaultTokenFrom and .Spec.DefaultToken are set, an error should occur through the webhook validate
 	if client_.Spec.DefaultToken == "" {
-		if client_.Spec.DefaultTokenFrom.ConfigMapRef.Name != "" { // Use ConfigMap
-			var (
-				configMap corev1.ConfigMap
-				ok        bool
-			)
-			if err := r.Get(ctx, client.ObjectKey{Namespace: client_.Namespace, Name: client_.Spec.DefaultTokenFrom.ConfigMapRef.Name}, &configMap); err != nil {
-				return err
-			}
-			client_.Spec.DefaultToken, ok = configMap.Data[client_.Spec.DefaultTokenFrom.ConfigMapRef.Key]
-			if !ok {
-				return fmt.Errorf("key %s not found in configmap %s", client_.Spec.DefaultTokenFrom.ConfigMapRef.Key, client_.Spec.DefaultTokenFrom.ConfigMapRef.Name)
-			}
-		} else if client_.Spec.DefaultTokenFrom.SecretRef.Name != "" { // Use Secret
-			var (
-				secret        corev1.Secret
-				secretContent []byte
-				ok            bool
-			)
-			if err := r.Get(ctx, client.ObjectKey{Namespace: client_.Namespace, Name: client_.Spec.DefaultTokenFrom.SecretRef.Name}, &secret); err != nil {
-				return err
-			}
-			secretContent, ok = secret.Data[client_.Spec.DefaultTokenFrom.SecretRef.Key]
-			if !ok {
-				return fmt.Errorf("key %s not found in secret %s", client_.Spec.DefaultTokenFrom.SecretRef.Key, client_.Spec.DefaultTokenFrom.SecretRef.Name)
-			}
-			client_.Spec.DefaultToken = string(secretContent)
+		var err error
+		if client_.Spec.DefaultToken, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.DefaultTokenFrom); err != nil {
+			return err
 		}
 	}
 
@@ -395,4 +361,37 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 	}
 
 	return nil
+}
+
+func ReadConfig(r Reconciler, ctx context.Context, namespace string, resourceFrom ratholev1alpha1.ResourceFrom) (string, error) {
+	if resourceFrom.SecretRef.Name != "" {
+		var (
+			secret        corev1.Secret
+			secretContent []byte
+			ok            bool
+		)
+		if err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: resourceFrom.SecretRef.Name}, &secret); err != nil {
+			return "", err
+		}
+		secretContent, ok = secret.Data[resourceFrom.SecretRef.Key]
+		if !ok {
+			return "", fmt.Errorf("key %s not found in secret %s", resourceFrom.SecretRef.Key, resourceFrom.SecretRef.Name)
+		}
+		return string(secretContent), nil
+	} else if resourceFrom.ConfigMapRef.Name != "" {
+		var (
+			configMap     corev1.ConfigMap
+			configContent string
+			ok            bool
+		)
+		if err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: resourceFrom.ConfigMapRef.Name}, &configMap); err != nil {
+			return "", err
+		}
+		configContent, ok = configMap.Data[resourceFrom.ConfigMapRef.Key]
+		if !ok {
+			return "", fmt.Errorf("key %s not found in configmap %s", resourceFrom.ConfigMapRef.Key, resourceFrom.ConfigMapRef.Name)
+		}
+		return configContent, nil
+	}
+	return "", fmt.Errorf("resourceFrom is not set")
 }
