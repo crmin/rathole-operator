@@ -70,10 +70,16 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 
 	// Read PKCS12 content from PKCS12From field and set to PKCS12 field
 	if server.Spec.Transport.Type == "tls" {
-		var err error
+		var (
+			err      error
+			filePath string
+		)
 		//pkcs12 -> filename
-		//TODO: secret 말고 configmap도 지원해야함
-		filePath := fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
+		if server.Spec.Transport.TLS.PKCS12From.SecretRef.Name != "" {
+			filePath = fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
+		} else if server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name != "" {
+			filePath = fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name)
+		}
 		server.Spec.Transport.TLS.PKCS12 = filePath
 
 		if server.Spec.Transport.TLS.PKCS12Password == "" {
