@@ -10,6 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
+	"time"
 )
 
 const ratholeSecretRoot = "/var/run/secrets/rathole"
@@ -112,7 +113,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	server.Status.Condition.ObservedGeneration = server.Generation
 	server.Status.Condition.Status = "Synced"
 	server.Status.Condition.Reason = "Reconciled"
-	// TODO: update last synced time
+	server.Status.Condition.LastSyncedTime = &metav1.Time{Time: time.Now()}
 	if err := r.Status().Update(ctx, server.DeepCopy()); err != nil {
 		return err
 	}
@@ -301,7 +302,7 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	client_.Status.Condition.ObservedGeneration = client_.Generation
 	client_.Status.Condition.Status = "Synced"
 	client_.Status.Condition.Reason = "Reconciled"
-	// TODO: update last synced time
+	client_.Status.Condition.LastSyncedTime = &metav1.Time{Time: time.Now()}
 	if err := r.Status().Update(ctx, client_.DeepCopy()); err != nil {
 		return err
 	}
@@ -431,7 +432,6 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 	service.Status.Condition.ObservedGeneration = service.Generation
 	service.Status.Condition.Status = "Synced"
 	service.Status.Condition.Reason = "Reconciled"
-
 	if err := r.Status().Update(ctx, service.DeepCopy()); err != nil {
 		return err
 	}
