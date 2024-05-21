@@ -17,5 +17,6 @@ spec:
     name: ratholeclient-sample
   type: tcp
   token: service-token
-  localAddr: 127.0.0.1:22
+  localAddr: 127.0.0.1:22  # 127.0.0.1 -> local addr in client
   bindAddr: 0.0.0.0:2222
+  # link cluster:2222 -> target:22 for ssh connection
