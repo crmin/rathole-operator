@@ -544,8 +544,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      "config",
-			MountPath: "/var/run/config.toml",
-			SubPath:   "config.toml",
+			MountPath: "/var/run/rathole",
 		},
 	}
 
@@ -573,11 +572,10 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 				Name:         "pkcs12",
 				VolumeSource: pkcs12VolumeSrc,
 			})
-			pkcs12Name := filepath.Base(server.Spec.Transport.TLS.PKCS12)
+			pkcs12Dir := filepath.Dir(server.Spec.Transport.TLS.PKCS12)
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{
 				Name:      "pkcs12",
-				MountPath: server.Spec.Transport.TLS.PKCS12,
-				SubPath:   pkcs12Name,
+				MountPath: pkcs12Dir,
 			})
 		}
 	}
@@ -611,7 +609,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 							Image: "crmin/rathole:v0.5.0-debug",
 							Args: []string{
 								"--server",
-								"/var/run/config.toml",
+								"/var/run/rathole/config.toml",
 							},
 							VolumeMounts: volumeMounts,
 						},
