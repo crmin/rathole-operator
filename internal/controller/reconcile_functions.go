@@ -604,7 +604,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 					},
 				},
 				Spec: corev1.PodSpec{
-					HostNetwork: true,
+					//HostNetwork: true,
 					Containers: []corev1.Container{
 						{
 							Name:  "rathole-server",
