@@ -63,6 +63,7 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	if server.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add finalizer
 		if !containsString(server.ObjectMeta.Finalizers, serverFinalizerName) {
+			log.Log.Info("Adding finalizer for server")
 			server.ObjectMeta.Finalizers = append(server.ObjectMeta.Finalizers, serverFinalizerName)
 			if err := r.Update(ctx, &server); err != nil {
 				return ctrl.Result{}, err
@@ -71,6 +72,7 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	} else {
 		// Remove finalizer for deletion
 		if containsString(server.ObjectMeta.Finalizers, serverFinalizerName) {
+			log.Log.Info("Removing finalizer for server")
 			server.ObjectMeta.Finalizers = removeString(server.ObjectMeta.Finalizers, serverFinalizerName)
 			if err := r.Update(ctx, &server); err != nil {
 				return ctrl.Result{}, err
@@ -78,15 +80,17 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}
 
-	// Skip if already reconciled. Spec hasn't changed
 	if server.Status.Condition.ObservedGeneration == server.Generation {
+		log.Log.Info("Skipping reconciliation: server spec hasn't changed")
 		return ctrl.Result{}, nil
 	}
 
 	if err := ReconcileServer(r, ctx, &server); err != nil {
+		log.Log.Error(err, "Failed to reconcile server")
 		server.Status.Condition.Status = "Error"
 		server.Status.Condition.Reason = err.Error()
 		if err := r.Status().Update(ctx, &server); err != nil {
+			log.Log.Error(err, "Failed to update server status")
 			return ctrl.Result{}, err
 		}
 		// Retry after 10 seconds
@@ -96,6 +100,8 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	if err := CreateServerDeployment(r, ctx, &server); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	log.Log.Info("Rathole server reconciled successfully")
 	return ctrl.Result{}, nil
 }
 

@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +30,9 @@ type Reconciler interface {
 }
 
 func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
+	log.Log.Info("Reconciling server")
 	if err := ValidateServer(server); err != nil {
+		log.Log.Error(err, "Server validation failed")
 		return err
 	}
 
@@ -53,6 +56,7 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	}
 
 	if len(server.Spec.Services) == 0 {
+		log.Log.Info("Server has no services, creating dummy service")
 		// Create dummy service
 		serviceSpec := &ratholev1alpha1.RatholeServiceSpec{
 			ServerRef: ratholev1alpha1.RatholeServiceResourceRef{
@@ -138,10 +142,12 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 		panic(err)
 	}
 
-	fmt.Printf("Config: %s\n", config)
+	fmt.Printf("========== [Server Config] ==========\n%s\n=====================================\n", config)
 
 	// upsert config to configTarget
 	configResourceType := strings.ToLower(server.Spec.ConfigTarget.ResourceType)
+
+	log.Log.Info("Upserting server config to configTarget", "resource", configResourceType, "name", server.Spec.ConfigTarget.Name, "namespace", server.Namespace, "key", "config.toml")
 
 	ownerRefs := []metav1.OwnerReference{
 		{
@@ -232,7 +238,9 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 }
 
 func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1.RatholeClient) error {
+	log.Log.Info("Reconciling client")
 	if err := ValidateClient(client_); err != nil {
+		log.Log.Error(err, "Client validation failed")
 		return err
 	}
 
@@ -256,6 +264,7 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	}
 
 	if len(client_.Spec.Services) == 0 {
+		log.Log.Info("Client has no services, creating dummy service")
 		// Create dummy service
 		serviceSpec := &ratholev1alpha1.RatholeServiceSpec{
 			ServerRef: ratholev1alpha1.RatholeServiceResourceRef{
@@ -336,10 +345,12 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 		panic(err)
 	}
 
-	fmt.Printf("Config: %s\n", config)
+	fmt.Printf("========== [Client Config] ==========\n%s\n=====================================\n", config)
 
 	// upsert config to configTarget
 	configResourceType := strings.ToLower(client_.Spec.ConfigTarget.ResourceType)
+
+	log.Log.Info("Upserting client config to configTarget", "resource", configResourceType, "name", client_.Spec.ConfigTarget.Name, "namespace", client_.Namespace, "key", "config.toml")
 
 	ownerRefs := []metav1.OwnerReference{
 		{
@@ -429,6 +440,7 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 }
 
 func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha1.RatholeService) error {
+	log.Log.Info("Reconciling service")
 	var (
 		server  ratholev1alpha1.RatholeServer
 		client_ ratholev1alpha1.RatholeClient
@@ -447,6 +459,7 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 	}
 
 	if err := ValidateService(service, &server, &client_); err != nil {
+		log.Log.Error(err, "Service validation failed")
 		return err
 	}
 
@@ -501,6 +514,7 @@ func ReadConfig(r Reconciler, ctx context.Context, namespace string, resourceFro
 }
 
 func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
+	log.Log.Info("Creating server deployment and service")
 	var replicas int32 = 1
 
 	var serverConfVolumeSrc corev1.VolumeSource
@@ -544,8 +558,6 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 		},
 	}
 
-	// TODO: Add secret and configmap volume
-	// pkcs12
 	if server.Spec.Transport.Type == "tls" {
 		if server.Spec.Transport.TLS.PKCS12 != "" {
 			var pkcs12VolumeSrc corev1.VolumeSource
@@ -573,6 +585,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 				Name:      "pkcs12",
 				MountPath: pkcs12Dir,
 			})
+			log.Log.Info("Mounting PKCS12", "path", server.Spec.Transport.TLS.PKCS12, "mountPath", pkcs12Dir)
 		}
 	}
 
@@ -625,6 +638,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 		if !strings.Contains(err.Error(), "already exists") {
 			return err
 		}
+		log.Log.Info("Deployment already exists", "name", server.ObjectMeta.Name)
 	}
 
 	serverPort, err := strconv.Atoi(strings.Split(server.Spec.BindAddr, ":")[1])
@@ -658,6 +672,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 		if !strings.Contains(err.Error(), "already exists") {
 			return err
 		}
+		log.Log.Info("Service already exists", "name", server.ObjectMeta.Name)
 	}
 
 	return nil

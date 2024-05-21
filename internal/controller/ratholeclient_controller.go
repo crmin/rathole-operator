@@ -61,6 +61,7 @@ func (r *RatholeClientReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	if client_.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add finalizer
 		if !containsString(client_.ObjectMeta.Finalizers, clientFinalizerName) {
+			log.Log.Info("Adding finalizer for client")
 			client_.ObjectMeta.Finalizers = append(client_.ObjectMeta.Finalizers, clientFinalizerName)
 			if err := r.Update(ctx, &client_); err != nil {
 				return ctrl.Result{}, err
@@ -69,6 +70,7 @@ func (r *RatholeClientReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	} else {
 		// Remove finalizer for deletion
 		if containsString(client_.ObjectMeta.Finalizers, clientFinalizerName) {
+			log.Log.Info("Removing finalizer for client")
 			client_.ObjectMeta.Finalizers = removeString(client_.ObjectMeta.Finalizers, clientFinalizerName)
 			if err := r.Update(ctx, &client_); err != nil {
 				return ctrl.Result{}, err
@@ -78,18 +80,23 @@ func (r *RatholeClientReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	// Skip if already reconciled. Spec hasn't changed
 	if client_.Status.Condition.ObservedGeneration == client_.Generation {
+		log.Log.Info("Skipping reconciliation: client spec hasn't changed")
 		return ctrl.Result{}, nil
 	}
 
 	if err := ReconcileClient(r, ctx, &client_); err != nil {
+		log.Log.Error(err, "Failed to reconcile client")
 		client_.Status.Condition.Status = "Error"
 		client_.Status.Condition.Reason = err.Error()
 		if err := r.Status().Update(ctx, &client_); err != nil {
+			log.Log.Error(err, "Failed to update client status")
 			return ctrl.Result{}, err
 		}
 		// Retry after 10 seconds
 		return ctrl.Result{RequeueAfter: 10}, nil
 	}
+
+	log.Log.Info("Rathole client reconciled successfully")
 	return ctrl.Result{}, nil
 }
 
