@@ -81,9 +81,9 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 		)
 		//pkcs12 -> filename
 		if server.Spec.Transport.TLS.PKCS12From.SecretRef.Name != "" {
-			filePath = fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name)
+			filePath = fmt.Sprintf("%s/%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.SecretRef.Name, server.Spec.Transport.TLS.PKCS12From.SecretRef.Key)
 		} else if server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name != "" {
-			filePath = fmt.Sprintf("%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name)
+			filePath = fmt.Sprintf("%s/%s/%s", ratholeSecretRoot, server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Name, server.Spec.Transport.TLS.PKCS12From.ConfigMapRef.Key)
 		}
 		server.Spec.Transport.TLS.PKCS12 = filePath
 
