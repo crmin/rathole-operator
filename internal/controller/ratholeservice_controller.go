@@ -77,7 +77,7 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 				return ctrl.Result{}, err
 			}
 			if err := ReconcileService(r, ctx, &service); err != nil {
-				// do nothing
+				log.Log.Error(err, "Failed to reconcile service for deletion")
 			}
 		}
 	}
