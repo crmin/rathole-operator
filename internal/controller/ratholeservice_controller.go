@@ -65,6 +65,7 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			if err := r.Update(ctx, &service); err != nil {
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{}, nil
 		}
 	} else {
 		// Remove finalizer for deletion
@@ -72,6 +73,9 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			service.ObjectMeta.Finalizers = removeString(service.ObjectMeta.Finalizers, serviceFinalizerName)
 			if err := r.Update(ctx, &service); err != nil {
 				return ctrl.Result{}, err
+			}
+			if err := ReconcileService(r, ctx, &service); err != nil {
+				// do nothing
 			}
 		}
 	}

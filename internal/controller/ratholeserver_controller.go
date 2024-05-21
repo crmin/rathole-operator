@@ -92,6 +92,10 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		// Retry after 10 seconds
 		return ctrl.Result{RequeueAfter: 10}, nil
 	}
+
+	if err := CreateServerDeployment(r, ctx, &server); err != nil {
+		return ctrl.Result{}, err
+	}
 	return ctrl.Result{}, nil
 }
 

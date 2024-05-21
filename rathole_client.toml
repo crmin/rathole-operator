@@ -1,0 +1,16 @@
+[client]
+remote_addr = '192.168.50.128:2222'
+default_token = 'abcdefghijklmnopqrstuvwxyz0123456789'
+
+[client.transport]
+type = 'tcp'
+
+[client.transport.tcp]
+nodelay = true
+keepalive_secs = 20
+
+[client.services]
+[client.services.ssh-service]
+type = 'tcp'
+token = 'service-token'
+local_addr = '127.0.0.1:2200'

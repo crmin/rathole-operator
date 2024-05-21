@@ -228,10 +228,6 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 		}
 	}
 
-	if err := CreateServerDeployment(r, ctx, server); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -625,7 +621,10 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 	}
 
 	if err := r.Create(ctx, deploy.DeepCopy()); err != nil {
-		return err
+		// if already exist, pass
+		if !strings.Contains(err.Error(), "already exists") {
+			return err
+		}
 	}
 
 	serverPort, err := strconv.Atoi(strings.Split(server.Spec.BindAddr, ":")[1])
@@ -655,7 +654,10 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 	}
 
 	if err := r.Create(ctx, service.DeepCopy()); err != nil {
-		return err
+		// if already exist, pass
+		if !strings.Contains(err.Error(), "already exists") {
+			return err
+		}
 	}
 
 	return nil
