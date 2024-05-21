@@ -45,14 +45,15 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	server.Spec.Services = make(map[string]*ratholev1alpha1.RatholeServiceSpec)
 
 	for _, service := range services.Items {
-		if service.Spec.ServerRef.Name != server.ObjectMeta.Name {
+		s := service.DeepCopy()
+		if s.Spec.ServerRef.Name != server.ObjectMeta.Name {
 			continue
 		}
 		// remove client options
-		service.Spec.LocalAddr = ""
-		service.Spec.RetryInterval = 0
+		s.Spec.LocalAddr = ""
+		s.Spec.RetryInterval = 0
 
-		server.Spec.Services[service.ObjectMeta.Name] = &service.Spec
+		server.Spec.Services[s.ObjectMeta.Name] = &s.Spec
 	}
 
 	if len(server.Spec.Services) == 0 {
@@ -253,14 +254,14 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	client_.Spec.Services = make(map[string]*ratholev1alpha1.RatholeServiceSpec)
 
 	for _, service := range services.Items {
-		if service.Spec.ClientRef.Name != client_.ObjectMeta.Name {
+		s := service.DeepCopy()
+		if s.Spec.ClientRef.Name != client_.ObjectMeta.Name {
 			continue
 		}
 		// remove server options
-		service.Spec.BindAddr = ""
+		s.Spec.BindAddr = ""
 
-		client_.Spec.Services[service.ObjectMeta.Name] = &service.Spec
-		// POINT-1
+		client_.Spec.Services[s.ObjectMeta.Name] = &s.Spec
 	}
 
 	if len(client_.Spec.Services) == 0 {
