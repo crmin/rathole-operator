@@ -235,6 +235,10 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 		}
 	}
 
+	if err := CreateServerDeployment(r, ctx, server); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -516,7 +520,7 @@ func ReadConfig(r Reconciler, ctx context.Context, namespace string, resourceFro
 
 func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1alpha1.RatholeServer) error {
 	log.Log.Info("Creating server deployment and service")
-	var replicas int32 = 1
+	var replicas int32 = 2 // for rolling update
 
 	var serverConfVolumeSrc corev1.VolumeSource
 	if server.Spec.ConfigTarget.ResourceType == "secret" {
@@ -639,7 +643,16 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 		if !strings.Contains(err.Error(), "already exists") {
 			return err
 		}
-		log.Log.Info("Deployment already exists", "name", server.ObjectMeta.Name)
+		log.Log.Info("Deployment already exists. Perform rolling update.", "name", server.ObjectMeta.Name)
+		an := deploy.Spec.Template.ObjectMeta.Annotations
+		if an == nil {
+			an = make(map[string]string)
+		}
+		an["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+		deploy.Spec.Template.ObjectMeta.Annotations = an
+		if err := r.Update(ctx, deploy.DeepCopy()); err != nil {
+			return err
+		}
 	}
 
 	serverPort, err := strconv.Atoi(strings.Split(server.Spec.BindAddr, ":")[1])

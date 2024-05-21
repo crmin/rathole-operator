@@ -97,10 +97,6 @@ func (r *RatholeServerReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{RequeueAfter: 10}, nil
 	}
 
-	if err := CreateServerDeployment(r, ctx, &server); err != nil {
-		return ctrl.Result{}, err
-	}
-
 	log.Log.Info("Rathole server reconciled successfully")
 	return ctrl.Result{}, nil
 }
