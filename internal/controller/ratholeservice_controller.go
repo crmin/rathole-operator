@@ -79,6 +79,7 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			if err := r.Update(ctx, &service); err != nil {
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{}, nil
 		}
 	}
 
