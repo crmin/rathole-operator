@@ -73,11 +73,11 @@ func (r *RatholeServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		if containsString(service.ObjectMeta.Finalizers, serviceFinalizerName) {
 			log.Log.Info("Removing finalizer for service")
 			service.ObjectMeta.Finalizers = removeString(service.ObjectMeta.Finalizers, serviceFinalizerName)
-			if err := r.Update(ctx, &service); err != nil {
-				return ctrl.Result{}, err
-			}
 			if err := ReconcileService(r, ctx, &service); err != nil {
 				log.Log.Error(err, "Failed to reconcile service for deletion")
+			}
+			if err := r.Update(ctx, &service); err != nil {
+				return ctrl.Result{}, err
 			}
 		}
 	}
