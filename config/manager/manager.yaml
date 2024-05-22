@@ -70,7 +70,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: controller:latest
+        image: crmin/rathole-operator:v1alpha1
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
