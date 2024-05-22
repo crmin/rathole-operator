@@ -49,6 +49,9 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 		if s.Spec.ServerRef.Name != server.ObjectMeta.Name {
 			continue
 		}
+		if !s.ObjectMeta.DeletionTimestamp.IsZero() { // will be deleted
+			continue
+		}
 		// remove client options
 		s.Spec.LocalAddr = ""
 		s.Spec.RetryInterval = 0
@@ -260,6 +263,9 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	for _, service := range services.Items {
 		s := service.DeepCopy()
 		if s.Spec.ClientRef.Name != client_.ObjectMeta.Name {
+			continue
+		}
+		if !s.ObjectMeta.DeletionTimestamp.IsZero() { // will be deleted
 			continue
 		}
 		// remove server options
