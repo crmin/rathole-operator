@@ -25,12 +25,7 @@ resources:
 namespace:
   create: true
   name: system
-
-# Default values for rathole-operator.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-#s
-
+  
 imagePullSecrets: []
 livenessProbe:
   httpGet:
