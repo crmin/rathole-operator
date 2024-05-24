@@ -1,0 +1,405 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: rathole-operator-metrics-reader
+    app.kubernetes.io/component: kube-rbac-proxy
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: rathole-operator-metrics-reader
+rules:
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: rolebinding
+    app.kubernetes.io/instance: rathole-operator-leader-election-rolebinding
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: rathole-operator-leader-election-rolebinding
+  namespace: {{ .Values.namespace.name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rathole-operator-leader-election-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccount.name }}
+    namespace: {{ .Values.namespace.name }}
+
+
+---
+
+# permissions to do leader election.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: role
+    app.kubernetes.io/instance: rathole-operator-leader-election-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: rathole-operator-leader-election-role
+  namespace: {{ .Values.namespace.name }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: rathole-operator
+    app.kubernetes.io/name: service
+    app.kubernetes.io/instance: rathole-operator-metrics-service
+    app.kubernetes.io/component: kube-rbac-proxy
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: rathole-operator-metrics-service
+  namespace: {{ .Values.namespace.name }}
+spec:
+  ports:
+    - name: https
+      port: 8443
+      protocol: TCP
+      targetPort: https
+  selector:
+    control-plane: rathole-operator
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrolebinding
+    app.kubernetes.io/instance: rathole-operator-proxy-rolebinding
+    app.kubernetes.io/component: kube-rbac-proxy
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: rathole-operator-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rathole-operator-proxy-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccount.name }}
+    namespace: {{ .Values.namespace.name }}
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: rathole-operator-proxy-role
+    app.kubernetes.io/component: kube-rbac-proxy
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: rathole-operator-proxy-role
+rules:
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+
+---
+
+# permissions for end users to edit ratholeclients.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeclient-editor-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: ratholeclient-editor-role
+rules:
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeclients
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeclients/status
+    verbs:
+      - get
+
+---
+
+# permissions for end users to view ratholeclients.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeclient-viewer-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: ratholeclient-viewer-role
+rules:
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeclients
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeclients/status
+    verbs:
+      - get
+
+---
+
+# permissions for end users to edit ratholeservers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeserver-editor-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: ratholeserver-editor-role
+rules:
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservers/status
+    verbs:
+      - get
+
+---
+
+# permissions for end users to view ratholeservers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeserver-viewer-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: ratholeserver-viewer-role
+rules:
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservers/status
+    verbs:
+      - get
+
+---
+
+# permissions for end users to edit ratholeservices.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeservice-editor-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: ratholeservice-editor-role
+rules:
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservices
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservices/status
+    verbs:
+      - get
+
+---
+
+
+# permissions for end users to view ratholeservices.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: ratholeservice-viewer-role
+    {{- include "rathole-operator.rbac-labels" . | nindent 4 }}
+  name: ratholeservice-viewer-role
+rules:
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeservices/status
+    verbs:
+      - get
+
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: rathole-operator-manager-role
+    app.kubernetes.io/component: rathole-operator
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: rathole-operator-manager-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmap
+      - secret
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - rathole.superclass.io
+    resources:
+      - ratholeclients
+      - ratholeclients/finalizers
+      - ratholeclients/status
+      - ratholeservers
+      - ratholeservers/finalizers
+      - ratholeservers/status
+      - ratholeservices
+      - ratholeservices/finalizers
+      - ratholeservices/status
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+
+{{- if .Values.serviceAccount.create }}
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: serviceaccount
+    app.kubernetes.io/instance: rathole-operator-sa
+    app.kubernetes.io/component: rathole-operator
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: {{ .Values.serviceAccount.name }}
+  namespace: {{ .Values.namespace.name }}
+{{- end }}
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrolebinding
+    app.kubernetes.io/instance: rathole-operator-manager-rolebinding
+    app.kubernetes.io/component: rathole-operator
+    {{- include "rathole-operator.created-meta" . | nindent 4 }}
+  name: rathole-operator-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rathole-operator-manager-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccount.name }}
+    namespace: {{ .Values.namespace.name }}

@@ -1,0 +1,46 @@
+crdVersion: v1alpha1
+
+serviceAccount:
+  create: true
+  name: rathole-operator
+
+replicaCount: 1
+
+image:
+  repository: crmin/rathole-operator
+  pullPolicy: IfNotPresent
+  tag: "v1alpha1"
+  
+affinity: {}
+nodeSelector: {}
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+    
+namespace:
+  create: true
+  name: system
+
+# Default values for rathole-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+#s
+
+imagePullSecrets: []
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8081
+  initialDelaySeconds: 15
+  periodSeconds: 20
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10

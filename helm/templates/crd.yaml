@@ -1,0 +1,1013 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: ratholeservers.rathole.superclass.io
+spec:
+  group: rathole.superclass.io
+  names:
+    kind: RatholeServer
+    listKind: RatholeServerList
+    plural: ratholeservers
+    singular: ratholeserver
+  scope: Namespaced
+  versions:
+    {{- if eq .Values.crdVersion "v1alpha1" }}
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: RatholeServer is the Schema for the ratholeservers API
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: RatholeServerSpec defines the desired state of RatholeServer
+              properties:
+                bindAddr:
+                  type: string
+                configTarget:
+                  description: |-
+                    INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                    Important: Run "make" to regenerate code after modifying this file
+                  properties:
+                    name:
+                      type: string
+                    resourceType:
+                      enum:
+                        - secret
+                        - Secret
+                        - configmap
+                        - Configmap
+                        - ConfigMap
+                      type: string
+                  type: object
+                defaultToken:
+                  type: string
+                defaultTokenFrom:
+                  properties:
+                    configMapRef:
+                      description: Selects a key from a ConfigMap.
+                      properties:
+                        key:
+                          description: The key to select.
+                          type: string
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                        optional:
+                          description: Specify whether the ConfigMap or its key must
+                            be defined
+                          type: boolean
+                      required:
+                        - key
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    secretRef:
+                      description: SecretKeySelector selects a key of a Secret.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must be
+                            a valid secret key.
+                          type: string
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must be
+                            defined
+                          type: boolean
+                      required:
+                        - key
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  type: object
+                deployment:
+                  description: For server deployment
+                  properties:
+                    nodeAffinity:
+                      description: Node affinity is a group of node affinity scheduling
+                        rules.
+                      properties:
+                        preferredDuringSchedulingIgnoredDuringExecution:
+                          description: |-
+                            The scheduler will prefer to schedule pods to nodes that satisfy
+                            the affinity expressions specified by this field, but it may choose
+                            a node that violates one or more of the expressions. The node that is
+                            most preferred is the one with the greatest sum of weights, i.e.
+                            for each node that meets all of the scheduling requirements (resource
+                            request, requiredDuringScheduling affinity expressions, etc.),
+                            compute a sum by iterating through the elements of this field and adding
+                            "weight" to the sum if the node matches the corresponding matchExpressions; the
+                            node(s) with the highest sum are the most preferred.
+                          items:
+                            description: |-
+                              An empty preferred scheduling term matches all objects with implicit weight 0
+                              (i.e. it's a no-op). A null preferred scheduling term matches no objects (i.e. is also a no-op).
+                            properties:
+                              preference:
+                                description: A node selector term, associated with the
+                                  corresponding weight.
+                                properties:
+                                  matchExpressions:
+                                    description: A list of node selector requirements
+                                      by node's labels.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                        - key
+                                        - operator
+                                      type: object
+                                    type: array
+                                  matchFields:
+                                    description: A list of node selector requirements
+                                      by node's fields.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                        - key
+                                        - operator
+                                      type: object
+                                    type: array
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              weight:
+                                description: Weight associated with matching the corresponding
+                                  nodeSelectorTerm, in the range 1-100.
+                                format: int32
+                                type: integer
+                            required:
+                              - preference
+                              - weight
+                            type: object
+                          type: array
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                          description: |-
+                            If the affinity requirements specified by this field are not met at
+                            scheduling time, the pod will not be scheduled onto the node.
+                            If the affinity requirements specified by this field cease to be met
+                            at some point during pod execution (e.g. due to an update), the system
+                            may or may not try to eventually evict the pod from its node.
+                          properties:
+                            nodeSelectorTerms:
+                              description: Required. A list of node selector terms.
+                                The terms are ORed.
+                              items:
+                                description: |-
+                                  A null or empty node selector term matches no objects. The requirements of
+                                  them are ANDed.
+                                  The TopologySelectorTerm type implements a subset of the NodeSelectorTerm.
+                                properties:
+                                  matchExpressions:
+                                    description: A list of node selector requirements
+                                      by node's labels.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                        - key
+                                        - operator
+                                      type: object
+                                    type: array
+                                  matchFields:
+                                    description: A list of node selector requirements
+                                      by node's fields.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                        - key
+                                        - operator
+                                      type: object
+                                    type: array
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              type: array
+                          required:
+                            - nodeSelectorTerms
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                  type: object
+                heartbeatInterval:
+                  type: integer
+                transport:
+                  properties:
+                    noise:
+                      properties:
+                        localPrivateKey:
+                          description: If not set localPrivateKey and remotePublicKey,
+                            do not use auth
+                          type: string
+                        localPrivateKeyFrom:
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                        pattern:
+                          description: If .Spec.Transport.Type is "noise", this field
+                            must be set.
+                          type: string
+                        remotePublicKey:
+                          type: string
+                        remotePublicKeyFrom:
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                      type: object
+                    tcp:
+                      properties:
+                        keepaliveInterval:
+                          type: integer
+                        keepaliveSecs:
+                          type: integer
+                        nodelay:
+                          description: Optional, also affects `noise` and `tls`
+                          type: boolean
+                      type: object
+                    tls:
+                      properties:
+                        pkcs12From:
+                          description: If .Spec.Transport.Type is "tls", this field
+                            must be set.
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                        pkcs12Password:
+                          type: string
+                        pkcs12PasswordFrom:
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                      required:
+                        - pkcs12From
+                      type: object
+                    type:
+                      enum:
+                        - tcp
+                        - tls
+                        - noise
+                        - websocket
+                      type: string
+                    websocket:
+                      properties:
+                        tls:
+                          description: If .Spec.Transport.Type is "websocket", this
+                            field must be set.
+                          type: boolean
+                      type: object
+                  type: object
+              required:
+                - bindAddr
+              type: object
+            status:
+              description: RatholeServerStatus defines the observed state of RatholeServer
+              properties:
+                condition:
+                  description: |-
+                    INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+                    Important: Run "make" to regenerate code after modifying this file
+                  properties:
+                    lastSyncedTime:
+                      format: date-time
+                      type: string
+                    observedGeneration:
+                      format: int64
+                      type: integer
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                  type: object
+                configTarget:
+                  properties:
+                    name:
+                      type: string
+                    resourceType:
+                      enum:
+                        - secret
+                        - Secret
+                        - configmap
+                        - Configmap
+                        - ConfigMap
+                      type: string
+                  type: object
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
+    {{- end }}
+
+---
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: ratholeclients.rathole.superclass.io
+spec:
+  group: rathole.superclass.io
+  names:
+    kind: RatholeClient
+    listKind: RatholeClientList
+    plural: ratholeclients
+    singular: ratholeclient
+  scope: Namespaced
+  versions:
+    {{ if eq .Values.crdVersion "v1alpha1" }}
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: RatholeClient is the Schema for the ratholeclients API
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: RatholeClientSpec defines the desired state of RatholeClient
+              properties:
+                configTarget:
+                  description: |-
+                    INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                    Important: Run "make" to regenerate code after modifying this file
+                  properties:
+                    name:
+                      type: string
+                    resourceType:
+                      enum:
+                        - secret
+                        - Secret
+                        - configmap
+                        - Configmap
+                        - ConfigMap
+                      type: string
+                  type: object
+                defaultToken:
+                  type: string
+                defaultTokenFrom:
+                  properties:
+                    configMapRef:
+                      description: Selects a key from a ConfigMap.
+                      properties:
+                        key:
+                          description: The key to select.
+                          type: string
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                        optional:
+                          description: Specify whether the ConfigMap or its key must
+                            be defined
+                          type: boolean
+                      required:
+                        - key
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    secretRef:
+                      description: SecretKeySelector selects a key of a Secret.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must be
+                            a valid secret key.
+                          type: string
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must be
+                            defined
+                          type: boolean
+                      required:
+                        - key
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  type: object
+                heartbeatTimeout:
+                  type: integer
+                remoteAddr:
+                  type: string
+                retryInterval:
+                  type: integer
+                transport:
+                  properties:
+                    noise:
+                      properties:
+                        localPrivateKey:
+                          type: string
+                        localPrivateKeyFrom:
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                        pattern:
+                          description: If .Spec.Transport.Type is "noise", this field
+                            must be set.
+                          type: string
+                        remotePublicKey:
+                          type: string
+                        remotePublicKeyFrom:
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                      type: object
+                    tcp:
+                      properties:
+                        keepaliveInterval:
+                          type: integer
+                        keepaliveSecs:
+                          type: integer
+                        nodelay:
+                          type: boolean
+                        proxy:
+                          description: Optional, also affects `noise` and `tls`
+                          type: string
+                      type: object
+                    tls:
+                      properties:
+                        hostname:
+                          type: string
+                        trustedRoot:
+                          type: string
+                        trustedRootFrom:
+                          description: |-
+                            If .Spec.Transport.Type is "tls", this field must be set.
+                            One of TrustedRootFrom and TrustedRoot must be set.
+                          properties:
+                            configMapRef:
+                              description: Selects a key from a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretRef:
+                              description: SecretKeySelector selects a key of a Secret.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                                - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                      type: object
+                    type:
+                      enum:
+                        - tcp
+                        - tls
+                        - noise
+                        - websocket
+                      type: string
+                    websocket:
+                      properties:
+                        tls:
+                          description: If .Spec.Transport.Type is "websocket", this
+                            field must be set.
+                          type: boolean
+                      type: object
+                  type: object
+              required:
+                - remoteAddr
+              type: object
+            status:
+              description: RatholeClientStatus defines the observed state of RatholeClient
+              properties:
+                condition:
+                  description: |-
+                    INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+                    Important: Run "make" to regenerate code after modifying this file
+                  properties:
+                    lastSyncedTime:
+                      format: date-time
+                      type: string
+                    observedGeneration:
+                      format: int64
+                      type: integer
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                  type: object
+                configTarget:
+                  properties:
+                    name:
+                      type: string
+                    resourceType:
+                      enum:
+                        - secret
+                        - Secret
+                        - configmap
+                        - Configmap
+                        - ConfigMap
+                      type: string
+                  type: object
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
+    {{- end }}
+
+---
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: ratholeservices.rathole.superclass.io
+spec:
+  group: rathole.superclass.io
+  names:
+    kind: RatholeService
+    listKind: RatholeServiceList
+    plural: ratholeservices
+    singular: ratholeservice
+  scope: Namespaced
+  versions:
+    {{ if eq .Values.crdVersion "v1alpha1" }}
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: RatholeService is the Schema for the ratholeservices API
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: RatholeServiceSpec defines the desired state of RatholeService
+              properties:
+                bindAddr:
+                  type: string
+                clientRef:
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+                  type: object
+                localAddr:
+                  type: string
+                nodelay:
+                  type: boolean
+                retryInterval:
+                  type: integer
+                serverRef:
+                  description: |-
+                    INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                    Important: Run "make" to regenerate code after modifying this file
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+                  type: object
+                token:
+                  type: string
+                type:
+                  enum:
+                    - tcp
+                    - udp
+                  type: string
+              required:
+                - bindAddr
+                - clientRef
+                - localAddr
+                - serverRef
+              type: object
+            status:
+              description: RatholeServiceStatus defines the observed state of RatholeService
+              properties:
+                condition:
+                  description: |-
+                    INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+                    Important: Run "make" to regenerate code after modifying this file
+                  properties:
+                    observedGeneration:
+                      format: int64
+                      type: integer
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                  type: object
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
+    {{- end }}
