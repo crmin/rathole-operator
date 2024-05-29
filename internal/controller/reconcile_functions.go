@@ -76,7 +76,8 @@ func ReconcileServer(r Reconciler, ctx context.Context, server *ratholev1alpha1.
 	// Set default token if set .Spec.DefaultTokenFrom and .Spec.DefaultToken is empty
 	if server.Spec.DefaultToken == "" {
 		var err error
-		if server.Spec.DefaultToken, err = ReadConfig(r, ctx, server.Namespace, server.Spec.DefaultTokenFrom); err != nil {
+		setDefaultTokenFrom := server.Spec.DefaultTokenFrom.SecretRef.Name != "" || server.Spec.DefaultTokenFrom.ConfigMapRef.Name != ""
+		if server.Spec.DefaultToken, err = ReadConfig(r, ctx, server.Namespace, server.Spec.DefaultTokenFrom); setDefaultTokenFrom && err != nil {
 			return err
 		}
 	}
@@ -291,7 +292,8 @@ func ReconcileClient(r Reconciler, ctx context.Context, client_ *ratholev1alpha1
 	// Set default token if set .Spec.DefaultTokenFrom and .Spec.DefaultToken is empty
 	if client_.Spec.DefaultToken == "" {
 		var err error
-		if client_.Spec.DefaultToken, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.DefaultTokenFrom); err != nil {
+		setDefaultTokenFrom := client_.Spec.DefaultTokenFrom.SecretRef.Name != "" || client_.Spec.DefaultTokenFrom.ConfigMapRef.Name != ""
+		if client_.Spec.DefaultToken, err = ReadConfig(r, ctx, client_.Namespace, client_.Spec.DefaultTokenFrom); setDefaultTokenFrom && err != nil {
 			return err
 		}
 	}
