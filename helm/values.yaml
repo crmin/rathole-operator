@@ -9,8 +9,8 @@ replicaCount: 1
 image:
   repository: crmin/rathole-operator
   pullPolicy: IfNotPresent
-  tag: "v1alpha1"
-  
+  tag: "v1alpha1-0.1.2"
+
 affinity: {}
 nodeSelector: {}
 
@@ -21,11 +21,11 @@ resources:
   requests:
     cpu: 10m
     memory: 64Mi
-    
+
 namespace:
   create: true
   name: system
-  
+
 imagePullSecrets: []
 livenessProbe:
   httpGet:
