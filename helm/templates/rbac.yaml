@@ -85,11 +85,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: rathole-operator-configmap-reader
+  name: rathole-operator-cluster-role
 rules:
-  - apiGroups: [""]
-    resources: ["configmaps", "secrets"]
-    verbs: ["get", "list", "watch", "create", "delete", "patch"]
+  - apiGroups:
+      - ""
+    resources:
+      - "configmaps"
+      - "secrets"
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+      - "patch"
 
 ---
 
@@ -97,14 +106,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: rathole-operator-configmap-reader-binding
+  name: rathole-operator-cluster-role-binding
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.serviceAccount.name }}
     namespace: {{ .Values.namespace.name }}
 roleRef:
   kind: ClusterRole
-  name: rathole-operator-configmap-reader
+  name: rathole-operator-cluster-role
   apiGroup: rbac.authorization.k8s.io
 
 
