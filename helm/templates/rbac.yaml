@@ -99,6 +99,7 @@ rules:
       - "create"
       - "delete"
       - "patch"
+      - "update"
   - apiGroups:
       - "apps"
     resources:
@@ -110,6 +111,7 @@ rules:
       - "create"
       - "delete"
       - "patch"
+      - "update"
   - apiGroups:
       - ""
     resources:
@@ -121,6 +123,7 @@ rules:
       - "create"
       - "delete"
       - "patch"
+      - "update"
 
 ---
 
