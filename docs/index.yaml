@@ -2,13 +2,13 @@ apiVersion: v1
 entries:
   rathole-operator:
   - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2024-05-24T17:39:01.736844+09:00"
+    appVersion: 0.1.1
+    created: "2024-05-30T10:31:47.058542+09:00"
     description: A Helm chart for Kubernetes
-    digest: b85ddbe012078e2903467b867ec556a0a7c57e0af2e564481724f24a4bd65430
+    digest: 20789026cfb8346bfab9074c555da2bb20e65805069c63ab38983eedf4b5e2ee
     name: rathole-operator
     type: application
     urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.0.tgz
-    version: 0.1.0
-generated: "2024-05-24T17:39:01.735614+09:00"
+    - https://rathole-operator.superclass.io/rathole-operator-0.1.1.tgz
+    version: 0.1.1
+generated: "2024-05-30T10:31:47.057643+09:00"
