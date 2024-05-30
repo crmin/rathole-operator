@@ -628,7 +628,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 					Containers: []corev1.Container{
 						{
 							Name:  "rathole-server",
-							Image: "crmin/rathole:v0.5.0-debug",
+							Image: "rapiz1/rathole:v0.5.0",
 							Args: []string{
 								"--server",
 								"/var/run/rathole/config.toml",
