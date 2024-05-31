@@ -483,6 +483,58 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 		return err
 	}
 
+	// To access a service within an incluster environment, create a ClusterIP service
+	svcName := fmt.Sprintf("rathole-svc-%s", service.ObjectMeta.Name)
+	bindPort_ := strings.Split(service.Spec.BindAddr, ":")[1]
+	var (
+		bindPort int
+		err      error
+	)
+	if bindPort, err = strconv.Atoi(bindPort_); err != nil {
+		return err
+	}
+
+	svc := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      svcName,
+			Namespace: service.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: service.APIVersion,
+					Kind:       service.Kind,
+					Name:       service.Name,
+					UID:        service.UID,
+				},
+			},
+			Labels: map[string]string{
+				"app":     service.ObjectMeta.Name,
+				"service": "rathole-service",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{ // connect to server
+				"app":     server.ObjectMeta.Name,
+				"service": "rathole-server",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "rathole",
+					Port:       int32(bindPort),
+					TargetPort: intstr.IntOrString{IntVal: int32(bindPort)},
+				},
+			},
+			Type: corev1.ServiceTypeClusterIP,
+		},
+	}
+
+	if err := r.Create(ctx, svc.DeepCopy()); err != nil {
+		// if already exist, pass
+		if !strings.Contains(err.Error(), "already exists") {
+			return err
+		}
+		log.Log.Info("Service already exists", "name", svcName)
+	}
+
 	if err := ReconcileServer(r, ctx, &server); err != nil {
 		return err
 	}
