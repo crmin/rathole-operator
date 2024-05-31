@@ -476,13 +476,6 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 		return err
 	}
 
-	service.Status.Condition.ObservedGeneration = service.Generation
-	service.Status.Condition.Status = "Synced"
-	service.Status.Condition.Reason = "Reconciled"
-	if err := r.Status().Update(ctx, service.DeepCopy()); err != nil {
-		return err
-	}
-
 	// To access a service within an incluster environment, create a ClusterIP service
 	svcName := fmt.Sprintf("rathole-svc-%s", service.ObjectMeta.Name)
 	bindPort_ := strings.Split(service.Spec.BindAddr, ":")[1]
@@ -533,6 +526,13 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 			return err
 		}
 		log.Log.Info("Service already exists", "name", svcName)
+	}
+
+	service.Status.Condition.ObservedGeneration = service.Generation
+	service.Status.Condition.Status = "Synced"
+	service.Status.Condition.Reason = "Reconciled"
+	if err := r.Status().Update(ctx, service.DeepCopy()); err != nil {
+		return err
 	}
 
 	if err := ReconcileServer(r, ctx, &server); err != nil {
