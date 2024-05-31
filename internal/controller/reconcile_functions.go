@@ -487,6 +487,11 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 		return err
 	}
 
+	serviceType := service.Spec.ServiceType
+	if serviceType == "" {
+		serviceType = "ClusterIP"
+	}
+
 	svc := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      svcName,
@@ -726,6 +731,11 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 		return err
 	}
 
+	serviceType := server.Spec.ServiceType
+	if serviceType == "" {
+		serviceType = "ClusterIP"
+	}
+
 	service := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:            server.ObjectMeta.Name,
@@ -745,7 +755,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 					TargetPort: intstr.IntOrString{IntVal: int32(serverPort)},
 				},
 			},
-			Type: server.Spec.ServiceType,
+			Type: serviceType,
 		},
 	}
 
