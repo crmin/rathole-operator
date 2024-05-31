@@ -607,6 +607,10 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 			Name:            server.ObjectMeta.Name,
 			Namespace:       server.Namespace,
 			OwnerReferences: ownerRefs,
+			Labels: map[string]string{
+				"app":     server.ObjectMeta.Name,
+				"service": "rathole-server",
+			},
 		},
 		Spec: v1.DeploymentSpec{
 			Replicas: &replicas,
