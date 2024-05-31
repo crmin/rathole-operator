@@ -690,6 +690,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 					TargetPort: intstr.IntOrString{IntVal: int32(serverPort)},
 				},
 			},
+			Type: corev1.ServiceTypeLoadBalancer, // TODO: Need to choice service type
 		},
 	}
 
