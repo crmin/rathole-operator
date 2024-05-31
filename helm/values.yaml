@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: crmin/rathole-operator
   pullPolicy: IfNotPresent
-  tag: "v1alpha1-0.1.3"
+  tag: "v1alpha1-0.1.4"
 
 affinity: {}
 nodeSelector: {}
