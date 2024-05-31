@@ -64,6 +64,17 @@ spec:
                 required:
                 - name
                 type: object
+              serviceAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              serviceType:
+                description: Service Type string describes ingress methods for a service
+                enum:
+                - ClusterIP
+                - NodePort
+                - LoadBalancer
+                type: string
               token:
                 type: string
               type:

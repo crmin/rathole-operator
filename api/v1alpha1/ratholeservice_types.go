@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,6 +42,12 @@ type RatholeServiceSpec struct {
 	Nodelay bool `json:"nodelay,omitempty" toml:"nodelay,omitempty"` // Override client.transport.nodelay
 	// +optional
 	RetryInterval uint `json:"retryInterval,omitempty" toml:"retry_interval,omitempty"` // Override client.retry_interval, for client
+	// For deployment and service
+
+	// +optional
+	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
+	ServiceType        v1.ServiceType    `json:"serviceType,omitempty" toml:"-"`        // default=ClusterIP
+	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" toml:"-"` // default={}
 }
 
 // RatholeServiceStatus defines the observed state of RatholeService
