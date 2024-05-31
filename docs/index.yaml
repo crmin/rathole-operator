@@ -3,7 +3,7 @@ entries:
   rathole-operator:
   - apiVersion: v2
     appVersion: 0.1.5
-    created: "2024-05-31T12:46:19.418716+09:00"
+    created: "2024-05-31T14:40:16.364721+09:00"
     description: A Helm chart for Kubernetes
     digest: c40175ccbc9a2ec16933d11e238c9b7c87827f20b9ffe3b75695336ffb8bc357
     name: rathole-operator
@@ -11,74 +11,4 @@ entries:
     urls:
     - https://rathole-operator.superclass.io/rathole-operator-0.1.8.tgz
     version: 0.1.8
-  - apiVersion: v2
-    appVersion: 0.1.4
-    created: "2024-05-31T12:46:19.418304+09:00"
-    description: A Helm chart for Kubernetes
-    digest: c2f4040346ccc08789ad681066f1bcef96c625c89d804a9ebae4a680d149ca48
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.7.tgz
-    version: 0.1.7
-  - apiVersion: v2
-    appVersion: 0.1.3
-    created: "2024-05-31T12:46:19.416534+09:00"
-    description: A Helm chart for Kubernetes
-    digest: ec75f6d1834a68654324075eacabdcfd6ad7d57d420e0a15a79fc07c15b7a297
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.6.tgz
-    version: 0.1.6
-  - apiVersion: v2
-    appVersion: 0.1.3
-    created: "2024-05-31T12:46:19.415605+09:00"
-    description: A Helm chart for Kubernetes
-    digest: 616950a4a84d2e77d0c7c403d0f9c273b8c57a733aa21e3c1a66ca33fb459361
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.5.tgz
-    version: 0.1.5
-  - apiVersion: v2
-    appVersion: 0.1.1
-    created: "2024-05-31T12:46:19.415112+09:00"
-    description: A Helm chart for Kubernetes
-    digest: d14c3bc742b3e20714a6542817313e253ba74355445edc06971cdbd10c56d51c
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.4.tgz
-    version: 0.1.4
-  - apiVersion: v2
-    appVersion: 0.1.1
-    created: "2024-05-31T12:46:19.414618+09:00"
-    description: A Helm chart for Kubernetes
-    digest: 5a3bc15502ae6d82d8e4e26c72aec55f56310bff6e61ef137ffe3bd522ae7eb5
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.3.tgz
-    version: 0.1.3
-  - apiVersion: v2
-    appVersion: 0.1.1
-    created: "2024-05-31T12:46:19.413913+09:00"
-    description: A Helm chart for Kubernetes
-    digest: 2017f20749a08453dfd5a464378b22335605980747462c3c4f9947e6655dddde
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.2.tgz
-    version: 0.1.2
-  - apiVersion: v2
-    appVersion: 0.1.1
-    created: "2024-05-31T12:46:19.413397+09:00"
-    description: A Helm chart for Kubernetes
-    digest: 20789026cfb8346bfab9074c555da2bb20e65805069c63ab38983eedf4b5e2ee
-    name: rathole-operator
-    type: application
-    urls:
-    - https://rathole-operator.superclass.io/rathole-operator-0.1.1.tgz
-    version: 0.1.1
-generated: "2024-05-31T12:46:19.41253+09:00"
+generated: "2024-05-31T14:40:16.363862+09:00"
