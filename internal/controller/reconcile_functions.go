@@ -503,6 +503,7 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 				"app":     service.ObjectMeta.Name,
 				"service": "rathole-service",
 			},
+			Annotations: service.Spec.ServiceAnnotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{ // connect to server
@@ -516,7 +517,7 @@ func ReconcileService(r Reconciler, ctx context.Context, service *ratholev1alpha
 					TargetPort: intstr.IntOrString{IntVal: int32(bindPort)},
 				},
 			},
-			Type: corev1.ServiceTypeClusterIP,
+			Type: service.Spec.ServiceType,
 		},
 	}
 
@@ -663,6 +664,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 				"app":     server.ObjectMeta.Name,
 				"service": "rathole-server",
 			},
+			Annotations: server.Spec.DeploymentAnnotations,
 		},
 		Spec: v1.DeploymentSpec{
 			Replicas: &replicas,
@@ -729,6 +731,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 			Name:            server.ObjectMeta.Name,
 			Namespace:       server.Namespace,
 			OwnerReferences: ownerRefs,
+			Annotations:     server.Spec.ServiceAnnotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
@@ -742,7 +745,7 @@ func CreateServerDeployment(r Reconciler, ctx context.Context, server *ratholev1
 					TargetPort: intstr.IntOrString{IntVal: int32(serverPort)},
 				},
 			},
-			Type: corev1.ServiceTypeLoadBalancer, // TODO: Need to choice service type
+			Type: server.Spec.ServiceType,
 		},
 	}
 
