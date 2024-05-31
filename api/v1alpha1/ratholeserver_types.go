@@ -47,6 +47,13 @@ type RatholeServerSpec struct {
 
 	// +optional
 	Services map[string]*RatholeServiceSpec `json:"-" toml:"services,omitempty"`
+
+	// For deployment and service
+	// +optional
+	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
+	ServiceType           v1.ServiceType    `json:"serviceType,omitempty" toml:"-"`           // default=ClusterIP
+	ServiceAnnotations    map[string]string `json:"serviceAnnotations,omitempty" toml:"-"`    // default={}
+	DeploymentAnnotations map[string]string `json:"deploymentAnnotations,omitempty" toml:"-"` // default={}
 }
 
 // RatholeServerStatus defines the observed state of RatholeServer

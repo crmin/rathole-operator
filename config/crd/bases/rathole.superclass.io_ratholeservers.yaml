@@ -300,8 +300,23 @@ spec:
                       type: string
                     type: object
                 type: object
+              deploymentAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
               heartbeatInterval:
                 type: integer
+              serviceAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              serviceType:
+                description: For deployment and service
+                enum:
+                - ClusterIP
+                - NodePort
+                - LoadBalancer
+                type: string
               transport:
                 properties:
                   noise:
